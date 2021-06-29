@@ -1,0 +1,113 @@
+BasicInfo:
+  FirstName: Gustavo
+  LastName: Machado
+  Photo: img/me2.png
+  Contacts:
+    - Icon: fa fa-paper-plane
+      Info: <a href="mailto:hello@gstv.dev">hey@gstv.dev</a>
+    - Icon: fa fa-link
+      Info: <a href="https://gstv.dev" target="_blank">gstv.dev</a>
+    - Icon: fa fa-globe-americas
+      Info: Berlin, Germany
+
+Profile: Challenge-driven professional with ~7 years of experience in Data Engineering. I'm passionate about code, software development and technology in general. Having had a computer since I was 4 years old, I was always very interested into learning how things work. Because of this, up until today I still can never let a difficult challenge or problem go until I have solved it. This also makes me work very well under pressure, and difficult things always keep me the most motivated.
+
+Experience:
+  - Employer: <a href="https://amazon.com" target=”_blank”>Amazon</a>
+    Place: Berlin, DE
+    Positions:
+      - Title: Data Engineer
+        Date: Mar 2021 - Present
+        Details:
+          - Create, maintain & optimise ETL pipelines supporting all Transportation Finance Controllership processes, using internal pipeline orchestration tools and 10TB+ AWS Redshift clusters
+          - Streamline current 
+        Badges: ['Redshift','DAGs','ETL','Tableau']
+  - Employer: <a href="https://n26.com" target=”_blank”>N26</a>
+    Place: Berlin, DE
+    Positions:
+      - Title: Data Engineer
+        Date: Oct 2019 - Feb 2021
+        Details:
+          - Conceptualize, design, develop, continuously deploy & maintain a modular, robust & highly extensible ELT/Data Pipeline framework using Python, inspired on Apache Airflow.
+          - Maintain hundreds of data pipelines that ingest high volumes of daily data in near-real-time from over 200 Postgres RDS instances, Kinesis/Kafka streams and external APIs.
+          - Deliver data infrastructure products that enable Data Scientists to deploy reliable Machine Learning services & models.
+          - Maintain & optimize a ~3TB Redshift Data Warehouse.
+        Badges: ['DAGs','Redshift','Kafka','Kinesis','Postgres','RDS','Redis','AWS','S3','Terraform','Jenkins','spot.io','Vault','Metabase']
+  - Employer: <a href="https://pepper.com" target="_blank">Pepper Media Holding GmbH</a>
+    Place: Berlin, DE
+    Positions:
+      - Title: Data Engineer
+        Date: Oct 2018 - Sep 2019
+        Details:
+          - Implement a framework using PySpark in AWS EMR which enables Data Scientists to efficiently train & serve real-time machine learning models based on ~200GB/month of event data.
+          - Evangelize and mentor the existing Data Engineering team on software development best practices, introducing concepts such as Test-Driven Development & Continuous Integration.
+          - Maintain and design new ETL pipelines using Python and Pentaho, on top of MySQL and BigQuery databases.
+          - Improve alerting and monitoring capabilities of the Data Engineering platform.
+        Badges: ['PySpark','MySQL','BigQuery','Pentaho','AWS EMR','Google Cloud Storage','Firebase','Gitlab CI','Superset']
+  - Employer: <a href="https://youse.com.br" target="_blank">Youse</a>
+    Place: São Paulo, BR
+    Positions:
+      - Title: Data Specialist
+        Date: Jun 2016 - Sep 2018
+        Details:
+          - Oversee the development of ETL pipelines using Apache Spark (Scala) & Redshift, on top of a new S3 Data Lake architecture consisting of Parquet files.
+          - Mentor a team of fresh Computer Science Interns on building Spark ETL pipelines.
+          - Continuous development of Looker data models for visualization of data from new Spark data workflows.
+          - Application of Machine Learning techniques to enable dynamic, personalized product recommendations, as well as classification of the customer & lead base.
+          - Implementation of the startup's initial Postgres Data Warehouse & Python ETL processes, housing all data from external sources.
+          - Implementation of statistical models to determine cross-sell propensity.
+        Badges: ['Apache Spark','Redshift','BigQuery','Postgres','R','scikit-learn','pandas', 'Looker']
+
+Education:
+  - Course: BSc in Computer Science
+    Place: Universidade Federal do ABC
+    Date: 2006 - 2010 (unfinished)
+
+Skills:
+  - Family: Programming
+    Items:
+      - Python
+      - HTML (including Jinja)
+      - Javascript
+      - CSS
+      - SASS
+      - SQL
+      - C#
+      - Bash
+      - MATLAB
+  - Family: Frameworks
+    Items:
+      - Django
+      - Flask
+      - Hugo
+      - React
+  - Family: Developer Tools
+    Items:
+      - Git
+      - Docker
+      - Jenkins
+      - AWS
+  - Family: Misc
+    Items:
+      - Adobe Tools
+      - LaTeX
+
+Languages:
+  - Name: Portuguese
+    Level: Native
+  - Name: English
+    Level: Fluent
+  - Name: Spanish
+    Level: B1
+
+Diplomas:
+  - ISTQB Tester Certification (2019)
+  - English Cambridge CAE (2009)
+
+Interests:
+  - Bouldering
+  - Cooking
+  - Windsurfing
+  - Bossa Nova
+  - Design
+  - Languages
