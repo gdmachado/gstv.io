@@ -1,0 +1,148 @@
+module:
+  imports:
+  - path: github.com/adityatelange/hugo-PaperMod
+
+baseURL: "https://gstv.io/"
+title: Gus Machado
+paginate: 5
+Copyright: © 2023 | [Gus Machado](https://gstv.io) | [`CC BY-NC 4.0`](https://creativecommons.org/licenses/by-nc/4.0/)
+
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+
+goatCounterAnalytics: gstvio
+
+minify:
+  disableXML: true
+  minifyOutput: true
+
+params:
+  env: production # to enable google analytics, opengraph, twitter-cards and schema.
+  title: Gus Machado
+  description: "Data-focussed Software Engineer, based in London, UK, currently a Data Engineer at Meta"
+  keywords: [Blog, Portfolio, PaperMod]
+  author: Gus Machado
+  images: ["/img/avatar.png"]
+  DateFormat: "January 2, 2006"
+  defaultTheme: auto # dark, light
+  disableThemeToggle: false
+
+  ShowReadingTime: true
+  ShowShareButtons: true
+  ShareButtons: ["linkedin", "twitter"]
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  ShowRssButtonInSectionTermList: true
+  UseHugoToc: true
+  disableSpecial1stPost: false
+  disableScrollToTop: false
+  comments: false
+  hidemeta: false
+  hideSummary: false
+  showtoc: true
+  tocopen: false
+
+  assets:
+    disableHLJS: true # to disable highlight.js
+    # disableFingerprinting: true
+    favicon: "/favicon.ico"
+    favicon16x16: "/favicon-16x16.png"
+    favicon32x32: "/favicon-32x32.png"
+    apple_touch_icon: "/apple-touch-icon.png"
+    safari_pinned_tab: "<link / abs url>"
+
+  label:
+    text: "Gus Machado"
+    # icon: /apple-touch-icon.png
+    # iconHeight: 35
+
+  # profile-mode
+  profileMode:
+    enabled: true # needs to be explicitly set
+    title: Hi, I'm Gus!
+    subtitle: Software engineer from London, UK. Passionate about data processing systems and AI/ML. Working as a Data Engineer at [Meta](https://meta.com). Likes to unwind by playing guitar, games and pointing a camera at pretty things. Owns a borderline-illegal amount of coffee paraphernalia. ☕️
+    imageUrl: "/img/avatar.png"
+    imageWidth: 250
+    imageHeight: 250
+    imageTitle: My avatar
+    buttons:
+      - name: Posts
+        url: posts
+      - name: Tags
+        url: tags
+      # - name: My CV
+      #   url: cv
+
+  socialIcons:
+    - name: email
+      url: "mailto:hello@gstv.io"
+    - name: github
+      url: "https://github.com/gdmachado"
+    - name: linkedin
+      url: "https://linkedin.com/in/gdmachado"
+
+  # analytics:
+  #   google:
+  #     SiteVerificationTag: "XYZabc"
+  #   bing:
+  #     SiteVerificationTag: "XYZabc"
+  #   yandex:
+  #     SiteVerificationTag: "XYZabc"
+
+  cover:
+    hidden: false # hide everywhere but not in structured data
+    hiddenInList: false # hide on list pages and home
+    hiddenInSingle: false # hide on single page
+    linkFullImages: false
+
+  editPost:
+    URL: "https://github.com/gstv.io/content"
+    Text: "Suggest Changes" # edit text
+    appendFilePath: true # to append file path to Edit link
+
+  # for search
+  # https://fusejs.io/api/options.html
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    keys: ["title", "permalink", "summary", "content"]
+
+menu:
+  main:
+    - identifier: search
+      name: search
+      url: /search/
+      weight: 10
+    - identifier: tags
+      name: tags
+      url: /tags/
+      weight: 20
+    - identifier: archive
+      name: archive
+      url: /archives/
+      weight: 30
+
+# Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
+# pygmentsUseClasses: true
+markup:
+  highlight:
+    # noClasses: false
+    # anchorLineNos: true
+    # codeFences: true
+    # guessSyntax: true
+    # lineNos: true
+    style: catppuccin-mocha
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON # is necessary
