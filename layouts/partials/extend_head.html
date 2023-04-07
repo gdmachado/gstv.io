@@ -1,5 +1,5 @@
 {{- if hugo.IsProduction | or (eq site.Params.env "production") }}
-    {{- if site.Params.goatCounterAnalytics }}
+    {{- if site.goatCounterAnalytics }}
         {{- template "partials/goatcounteranalytics.html" . }}
     {{- end -}}
 {{- end -}}
