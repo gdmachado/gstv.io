@@ -1,6 +1,6 @@
 ---
 title: "I trained an AI to create my new profile picture - and the results are eerily accurate"
-date: 2023-04-07T16:17:24+01:00
+date: 2022-10-04T16:17:24+01:00
 # weight: 1
 # aliases: ["/first"]
 tags:
