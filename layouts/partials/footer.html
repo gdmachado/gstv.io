@@ -75,9 +75,15 @@
         if (document.body.className.includes("dark")) {
             document.body.classList.remove('dark');
             localStorage.setItem("pref-theme", 'light');
+            {{- if and (site.Params.comments) (site.Params.comments.giscus) }}
+            changeGiscusTheme({{ site.Params.comments.giscus.theme_light }});
+            {{- end }}
         } else {
             document.body.classList.add('dark');
             localStorage.setItem("pref-theme", 'dark');
+            {{- if and (site.Params.comments) (site.Params.comments.giscus) }}
+            changeGiscusTheme({{ site.Params.comments.giscus.theme_dark }});
+            {{- end }}
         }
     })
 

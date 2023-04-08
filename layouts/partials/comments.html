@@ -1,0 +1,32 @@
+{{ if site.Params.comments.giscus }}
+<script>
+    let giscusTheme = localStorage.getItem("pref-theme") === "dark" ? '{{ site.Params.comments.giscus.theme_dark }}' : '{{ site.Params.comments.giscus.theme_light }}';
+    let giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo": "{{site.Params.comments.giscus.repo}}",
+        "data-repo-id": "{{site.Params.comments.giscus.repo_id}}",
+        "data-category": "{{site.Params.comments.giscus.category}}",
+        "data-category-id": "{{site.Params.comments.giscus.category_id}}",
+        "data-mapping": "{{site.Params.comments.giscus.mapping}}",
+        "data-reactions-enabled": "{{site.Params.comments.giscus.reactions_enabled}}",
+        "data-emit-metadata": "{{site.Params.comments.giscus.emit_metadata}}",
+        "data-input-position": "{{site.Params.comments.giscus.input_position}}",
+        "data-theme": giscusTheme === null ? "preferred_color_scheme" : giscusTheme,
+        "data-lang": "{{site.Params.comments.giscus.lang}}",
+        "data-loading": "{{site.Params.comments.giscus.loading}}",
+        "crossorigin": "anonymous",
+        "async": "",
+    };
+    
+    let giscusScript = document.createElement("script");
+    Object.entries(giscusAttributes).forEach(([key, value]) => giscusScript.setAttribute(key, value));
+    var article = document.getElementsByTagName("article")[0].appendChild(giscusScript);
+</script>
+<noscript>Please enable JavaScript to view the comments powered by giscus.</noscript>
+{{ end }}
+
+
+
+<!-- Comments area start -->
+
+<!-- Comments area end -->

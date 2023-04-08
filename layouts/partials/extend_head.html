@@ -3,3 +3,8 @@
         {{- template "partials/goatcounteranalytics.html" . }}
     {{- end -}}
 {{- end -}}
+
+{{- if and (site.Params.comments) (site.Params.comments.giscus) }}
+{{- $giscustheme := resources.Get "js/changegiscustheme.js" }}
+<script defer src="{{ $giscustheme.RelPermalink }}" onload="changeGiscusTheme();" integrity="{{ $giscustheme.Data.Integrity }}"></script>
+{{- end -}}

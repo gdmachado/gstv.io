@@ -15,7 +15,6 @@ showToc: true
 TocOpen: false
 draft: false
 hidemeta: false
-comments: false
 description: "AI-generated image technology is evolving at an insanely fast pace. Here's how I generated my profile picture using it."
 disableShare: false
 hideSummary: false
