@@ -1,0 +1,28 @@
+{{- $user := .user -}}
+{{- $apiKey := .apiKey -}}
+<aside class="np-window" data-state="loading" aria-live="polite" aria-label="Now playing on Last.fm">
+  <header class="np-titlebar">
+    <div class="np-traffic" aria-hidden="true">
+      <button class="tl tl-close" type="button" aria-label="dismiss"></button>
+      <span class="tl tl-min"></span>
+      <span class="tl tl-max"></span>
+    </div>
+    <div class="np-title">
+      <span class="np-user">{{ $user }}</span><span class="np-at">@</span><span class="np-host">last.fm</span><span class="np-sep">:</span> <span class="np-cwd">~/now-playing</span>
+    </div>
+  </header>
+  <div class="np-body">
+    <div class="np-prompt"><span class="np-sym">~</span> now-playing</div>
+    <div class="np-output">
+      <span class="np-status" aria-hidden="true">◍</span>
+      <span class="np-track">fetching...</span>
+      <span class="np-meta"></span>
+    </div>
+    <a class="np-link" href="https://www.last.fm/user/{{ $user }}" target="_blank" rel="noopener" aria-label="View on Last.fm">view on last.fm &#8594;</a>
+  </div>
+</aside>
+{{- if $apiKey }}
+<script>window.__LASTFM__ = {{ (dict "user" $user "apiKey" $apiKey) | jsonify | safeJS }};</script>
+{{- $np := resources.Get "js/now-playing.js" | minify | fingerprint }}
+<script defer src="{{ $np.RelPermalink }}" integrity="{{ $np.Data.Integrity }}"></script>
+{{- end }}

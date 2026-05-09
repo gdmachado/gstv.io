@@ -1,0 +1,206 @@
+/* Unified pill-button style + social icons + share row + paginav. */
+
+/* Unified pill-button style: mono font, rounded, outline. Used by profile buttons,
+   tag pills, share buttons, paginav cards, and 404 nav links. */
+.profile .buttons .button,
+.post-tags li a,
+.terms-tags li a {
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--primary);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 0.4rem 0.95rem;
+    transition: transform 200ms cubic-bezier(0.2,0.7,0.3,1),
+                background 180ms ease,
+                border-color 180ms ease,
+                color 180ms ease,
+                box-shadow 200ms ease;
+}
+
+.profile .buttons .button .button-inner {
+    font-family: inherit;
+    letter-spacing: 0.01em;
+}
+
+.profile .buttons .button:hover,
+.post-tags li a:hover,
+.terms-tags li a:hover {
+    background: color-mix(in srgb, var(--link) 8%, var(--entry));
+    border-color: var(--link);
+    color: var(--link);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+}
+
+html[data-theme="light"] .profile .buttons .button:hover,
+html[data-theme="light"] .post-tags li a:hover,
+html[data-theme="light"] .terms-tags li a:hover {
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+.profile .buttons .button:active,
+.post-tags li a:active,
+.terms-tags li a:active { transform: translateY(0); }
+
+/* Post entries (cards): definition border for white-on-white */
+
+/* ──────────────── Social icons (profile mode): circular outline ──────────────── */
+.social-icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    justify-content: center;
+}
+
+.social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: 0 !important;
+    border-radius: 999px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    color: var(--secondary);
+    transition: transform 200ms cubic-bezier(0.2,0.7,0.3,1),
+                background 180ms ease,
+                border-color 180ms ease,
+                color 180ms ease,
+                box-shadow 200ms ease;
+}
+
+.social-icons a:hover {
+    background: color-mix(in srgb, var(--link) 8%, var(--entry));
+    border-color: var(--link);
+    color: var(--link);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+}
+
+html[data-theme="light"] .social-icons a:hover {
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+.social-icons a:active { transform: translateY(0); }
+
+.social-icons a svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ──────────────── Share section (post bottom): labeled pill buttons ──────────────── */
+.share {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    margin: 2rem 0 1rem;
+}
+
+.share-label {
+    color: var(--secondary);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+}
+
+.share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.share-buttons li { margin: 0; }
+
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.95rem 0.4rem 0.7rem;
+    border-radius: 999px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    color: var(--primary);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1;
+    text-decoration: none;
+    transition: transform 200ms cubic-bezier(0.2,0.7,0.3,1),
+                background 180ms ease,
+                border-color 180ms ease,
+                color 180ms ease,
+                box-shadow 200ms ease;
+}
+
+.share-btn:hover {
+    background: color-mix(in srgb, var(--link) 8%, var(--entry));
+    border-color: var(--link);
+    color: var(--link);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+}
+
+html[data-theme="light"] .share-btn:hover {
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+.share-btn:active { transform: translateY(0); }
+
+.share-btn svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+}
+
+.share-btn-name {
+    font-weight: 500;
+    letter-spacing: 0.005em;
+}
+
+/* Paginav (prev / next) */
+.paginav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.paginav a {
+    flex: 1 1 220px;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--primary);
+    transition: transform 200ms cubic-bezier(0.2,0.7,0.3,1),
+                border-color 180ms ease,
+                box-shadow 200ms ease;
+}
+
+.paginav a:hover {
+    border-color: var(--link);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+}
+
+html[data-theme="light"] .paginav a:hover {
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+.paginav .title {
+    color: var(--primary);
+}
+
+.paginav a:hover .title {
+    color: var(--link);
+}
+
+.paginav a:hover .next::after,
+.paginav a:hover .prev::before { color: var(--link); }
+
+/* Now-playing: Mac/Ghostty-style terminal window */

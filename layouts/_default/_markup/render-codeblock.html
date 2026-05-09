@@ -1,0 +1,17 @@
+{{- $lang := .Type | default "text" -}}
+{{- if eq $lang "mermaid" -}}
+<pre class="mermaid">{{ .Inner }}</pre>
+{{- else -}}
+{{- $opts := dict "linenos" "true" -}}
+<figure class="code-window" data-lang="{{ $lang }}">
+  <header class="code-titlebar" aria-hidden="true">
+    <div class="code-traffic">
+      <span class="tl tl-close"></span>
+      <span class="tl tl-min"></span>
+      <span class="tl tl-max"></span>
+    </div>
+    <div class="code-lang">{{ $lang }}</div>
+  </header>
+  {{ transform.Highlight (trim .Inner "\n") $lang $opts }}
+</figure>
+{{- end -}}

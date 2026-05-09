@@ -1,0 +1,6 @@
+{{- $display := .Get "display" | default "false" -}}
+{{- if eq $display "true" -}}
+\[{{ .Inner | safeHTML }}\]
+{{- else -}}
+\({{ .Inner | safeHTML }}\)
+{{- end -}}

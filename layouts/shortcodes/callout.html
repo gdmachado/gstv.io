@@ -1,0 +1,16 @@
+{{- $kind := .Get "kind" | default "note" -}}
+{{- $title := .Get "title" -}}
+<aside class="callout callout-{{ $kind }}" role="note">
+  <div class="callout-icon" aria-hidden="true">
+    {{- if eq $kind "tip" }}&#9728;
+    {{- else if eq $kind "warning" }}&#9888;
+    {{- else if eq $kind "danger" }}&#9876;
+    {{- else if eq $kind "info" }}&#9432;
+    {{- else }}&#9998;
+    {{- end -}}
+  </div>
+  <div class="callout-body">
+    {{- with $title }}<p class="callout-title">{{ . }}</p>{{ end }}
+    {{ .Inner | $.Page.RenderString }}
+  </div>
+</aside>

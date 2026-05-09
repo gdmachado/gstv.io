@@ -1,0 +1,38 @@
+{{- define "main" }}
+
+<article class="post-single photo-single">
+  <header class="post-header">
+    <h1 class="post-title">{{ .Title }}</h1>
+    {{- if or .Params.camera .Params.lens .Params.location }}
+    <ul class="photo-meta">
+      {{- with .Params.camera }}<li><span>camera</span> {{ . }}</li>{{ end }}
+      {{- with .Params.lens }}<li><span>lens</span> {{ . }}</li>{{ end }}
+      {{- with .Params.location }}<li><span>location</span> {{ . }}</li>{{ end }}
+      <li><span>shot</span> {{ .Date.Format (.Site.Params.DateFormat | default "January 2, 2006") }}</li>
+    </ul>
+    {{- end }}
+  </header>
+
+  <div class="photo-stack">
+    {{- range (.Resources.ByType "image") }}
+      {{- if (or (eq .Name "cover") (not (hasPrefix .Name "cover."))) }}
+        {{- $full := .Resize (printf "%dx webp q88" (math.Min 1600 .Width)) }}
+        {{- $half := .Resize "800x webp q80" }}
+        <figure>
+          <img
+            src="{{ $full.RelPermalink }}"
+            srcset="{{ $half.RelPermalink }} 800w, {{ $full.RelPermalink }} {{ $full.Width }}w"
+            sizes="(min-width: 1024px) 1024px, 100vw"
+            width="{{ $full.Width }}" height="{{ $full.Height }}"
+            alt="{{ $.Title }}" loading="lazy" decoding="async">
+        </figure>
+      {{- end }}
+    {{- end }}
+  </div>
+
+  {{- if .Content }}
+  <div class="post-content">{{ .Content }}</div>
+  {{- end }}
+</article>
+
+{{- end }}
