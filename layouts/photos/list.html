@@ -1,0 +1,33 @@
+{{- define "main" }}
+
+<header class="page-header">
+  <h1>{{ .Title }}</h1>
+  {{- if .Description }}
+  <div class="post-description">{{ .Description }}</div>
+  {{- end }}
+  {{- if .Content }}
+  <div class="post-content">{{ .Content }}</div>
+  {{- end }}
+</header>
+
+<section class="photos-grid">
+  {{- range .Pages.ByPublishDate.Reverse }}
+    {{- $cover := (.Resources.ByType "image").GetMatch "cover.*" }}
+    {{- if not $cover }}{{ $cover = (.Resources.ByType "image").GetMatch "*" }}{{ end }}
+    {{- if $cover }}
+      {{- $thumb := $cover.Resize "800x webp q82" }}
+      {{- $small := $cover.Resize "400x webp q70" }}
+      <a class="photo-card" href="{{ .RelPermalink }}" aria-label="{{ .Title }}">
+        <img
+          src="{{ $thumb.RelPermalink }}"
+          srcset="{{ $small.RelPermalink }} 400w, {{ $thumb.RelPermalink }} 800w"
+          sizes="(min-width: 800px) 400px, 100vw"
+          width="{{ $thumb.Width }}" height="{{ $thumb.Height }}"
+          alt="{{ .Title }}" loading="lazy" decoding="async">
+        <span class="photo-card-title">{{ .Title }}</span>
+      </a>
+    {{- end }}
+  {{- end }}
+</section>
+
+{{- end }}

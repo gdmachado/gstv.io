@@ -1,0 +1,240 @@
+/* Last.fm now-playing widget (Mac/Ghostty window aesthetic). */
+
+/* Now-playing: Mac/Ghostty-style terminal window */
+.np-window {
+    --np-bg:       #181825; /* Catppuccin Mantle */
+    --np-fg:       #cdd6f4; /* Text */
+    --np-dim:      #6c7086; /* Overlay 0 */
+    --np-muted:    #a6adc8; /* Subtext 0 */
+    --np-prompt:   #a6e3a1; /* Green */
+    --np-cmd:      #89b4fa; /* Blue */
+    --np-flag:     #f9e2af; /* Yellow */
+    --np-accent:   #f38ba8; /* Pink */
+    --np-border:   #45475a; /* Surface 1 */
+    --np-titlebar: #313244; /* Surface 0 */
+    --np-titlebar-hi: #3e4055;
+
+    position: relative;
+    margin: 1.5rem auto 0;
+    max-width: 30rem;
+    background: var(--np-bg);
+    color: var(--np-fg);
+    border: 1px solid var(--np-border);
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    text-align: left;
+    overflow: hidden;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 14px 36px rgba(0,0,0,0.35),
+        0 2px 6px rgba(0,0,0,0.25);
+    transition: transform 220ms cubic-bezier(0.2,0.7,0.3,1), opacity 180ms ease;
+}
+
+.np-titlebar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 0.75rem;
+    padding: 0.5rem 0.85rem;
+    background: linear-gradient(180deg, var(--np-titlebar-hi), var(--np-titlebar));
+    border-bottom: 1px solid rgba(0,0,0,0.35);
+    user-select: none;
+    cursor: default;
+}
+
+.np-traffic {
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+.tl {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #4d4d4d;
+    border: 1px solid rgba(0,0,0,0.4);
+    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.4) inset, 0 1px 0 rgba(255,255,255,0.08);
+    padding: 0;
+    transition: filter 150ms ease, transform 150ms ease;
+}
+
+.tl-close { background: #ff5f57; }
+.tl-min   { background: #febc2e; }
+.tl-max   { background: #28c840; }
+
+button.tl {
+    cursor: pointer;
+    appearance: none;
+}
+
+.np-window:hover .tl::before,
+.np-window:focus-within .tl::before {
+    content: "";
+    display: block;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+}
+
+button.tl:hover { filter: brightness(1.05); transform: scale(1.05); }
+button.tl:active { transform: scale(0.92); }
+
+.np-title {
+    grid-column: 2;
+    text-align: center;
+    color: var(--np-muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.np-user { color: var(--np-fg); font-weight: 500; }
+.np-at   { color: var(--np-dim); }
+.np-host { color: var(--np-muted); }
+.np-sep  { color: var(--np-dim); }
+.np-cwd  { color: var(--np-flag); }
+
+.np-body {
+    position: relative;
+    padding: 0.85rem 1rem 0.7rem;
+}
+
+.np-prompt {
+    color: var(--np-dim);
+    margin: 0 0 0.5rem;
+    user-select: text;
+}
+
+.np-sym  { color: var(--np-prompt); margin-right: 0.25em; }
+
+.np-output {
+    display: grid;
+    grid-template-columns: 1.3em 1fr;
+    column-gap: 0.45em;
+    align-items: baseline;
+    transition: opacity 220ms ease;
+}
+
+.np-window.np-changing .np-output { opacity: 0; }
+
+.np-status {
+    color: var(--np-dim);
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+.np-track {
+    color: var(--np-fg);
+    font-weight: 600;
+    word-break: break-word;
+    grid-column: 2;
+}
+
+.np-meta {
+    color: var(--np-dim);
+    grid-column: 2;
+    font-size: 0.95em;
+}
+
+.np-link {
+    display: block;
+    text-align: right;
+    margin-top: 0.85rem;
+    font-size: 0.72rem;
+    color: var(--np-dim);
+    opacity: 0;
+    transition: opacity 200ms ease, color 160ms ease;
+    text-decoration: none;
+}
+
+.np-window:hover .np-link,
+.np-window:focus-within .np-link {
+    opacity: 1;
+}
+
+.np-link:hover { color: var(--np-cmd); }
+
+/* States */
+.np-window[data-state="playing"] .np-status {
+    color: var(--np-accent);
+    animation: np-pulse 1.4s ease-in-out infinite;
+}
+.np-window[data-state="recent"]  .np-status { color: var(--np-cmd); }
+.np-window[data-state="error"]   .np-status { color: var(--np-accent); }
+.np-window[data-state="idle"]    .np-status { color: var(--np-dim); }
+
+.np-window[data-state="loading"] .np-track::after,
+.np-window[data-state="idle"]    .np-track::after {
+    content: "▌";
+    color: var(--np-prompt);
+    margin-left: 0.25em;
+    animation: np-blink 1.05s steps(1) infinite;
+}
+
+/* Easter egg: clicking the red traffic light fades the widget briefly */
+.np-window.np-dismissed {
+    opacity: 0;
+    transform: scale(0.985);
+    pointer-events: none;
+}
+
+/* Easter egg: clicking yellow collapses to titlebar */
+.np-window.np-collapsed .np-body {
+    display: none;
+}
+
+@keyframes np-pulse {
+    0%, 100% { opacity: 1;    transform: scale(1); }
+    50%      { opacity: 0.45; transform: scale(0.86); }
+}
+
+@keyframes np-blink {
+    0%, 50%   { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .np-window[data-state="playing"] .np-status,
+    .np-window .np-track::after,
+    .np-window {
+        animation: none;
+        transition: none;
+    }
+    .np-window.np-changing .np-output { opacity: 1; }
+}
+
+/* Light theme: full Catppuccin Latte palette; body sits at pure white so the chrome reads as a Mac window */
+html[data-theme="light"] .np-window {
+    --np-bg:           #ffffff;
+    --np-fg:           var(--ctp-latte-text);
+    --np-dim:          var(--ctp-latte-overlay0);
+    --np-muted:        var(--ctp-latte-subtext0);
+    --np-prompt:       var(--ctp-latte-green);
+    --np-cmd:          var(--ctp-latte-blue);
+    --np-flag:         var(--ctp-latte-yellow);
+    --np-accent:       var(--ctp-latte-red);
+    --np-border:       var(--ctp-latte-surface1);
+    --np-titlebar:     var(--ctp-latte-surface0);
+    --np-titlebar-hi:  #d6dae4;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 14px 32px rgba(0,0,0,0.10),
+        0 2px 6px rgba(0,0,0,0.06);
+}
+
+html[data-theme="light"] .np-titlebar {
+    border-bottom-color: rgba(0,0,0,0.08);
+}
+
+html[data-theme="light"] .tl {
+    border-color: rgba(0,0,0,0.18);
+    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.18) inset, 0 1px 0 rgba(255,255,255,0.45);
+}
+
+/* Photos grid */

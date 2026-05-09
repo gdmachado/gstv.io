@@ -1,0 +1,26 @@
+{{- $base := resources.Get "images/og-base.png" -}}
+{{- $font := resources.Get "fonts/Satoshi-Bold.ttf" -}}
+
+{{- /* Wrap title to ~22 chars/line */ -}}
+{{- $title := .Title | default site.Title -}}
+{{- $words := split $title " " -}}
+{{- $lines := slice -}}
+{{- $current := "" -}}
+{{- range $words -}}
+  {{- $candidate := cond (eq $current "") . (printf "%s %s" $current .) -}}
+  {{- if gt (len $candidate) 22 -}}
+    {{- $lines = $lines | append $current -}}
+    {{- $current = . -}}
+  {{- else -}}
+    {{- $current = $candidate -}}
+  {{- end -}}
+{{- end -}}
+{{- if ne $current "" -}}{{- $lines = $lines | append $current -}}{{- end -}}
+{{- $wrapped := delimit $lines "\n" -}}
+
+{{- $stamped := $base.Filter
+    (images.Text $wrapped (dict "color" "#cdd6f4" "size" 72 "linespacing" 16 "x" 80 "y" 90 "font" $font))
+    (images.Text "gstv.io" (dict "color" "#7f849c" "size" 28 "x" 80 "y" 540 "font" $font))
+-}}
+{{- $out := resources.Copy (printf "og/%s.png" (.File.UniqueID | default "default")) $stamped -}}
+{{- $out.Permalink -}}

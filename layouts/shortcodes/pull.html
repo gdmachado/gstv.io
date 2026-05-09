@@ -1,0 +1,14 @@
+{{- $author := .Get "author" -}}
+{{- $cite := .Get "cite" -}}
+<figure class="pull-quote">
+  <blockquote>
+    {{ .Inner | $.Page.RenderString }}
+  </blockquote>
+  {{- if or $author $cite }}
+  <figcaption>
+    {{- with $author }}<span class="pull-quote-author">{{ . }}</span>{{ end }}
+    {{- if and $author $cite }} <span class="pull-quote-sep">·</span> {{ end }}
+    {{- with $cite }}<cite>{{ . }}</cite>{{ end }}
+  </figcaption>
+  {{- end }}
+</figure>

@@ -1,0 +1,45 @@
+name: Link check
+
+on:
+  schedule:
+    - cron: "0 5 * * 1" # Monday 05:00 UTC
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "content/**"
+      - "layouts/**"
+      - "hugo.yaml"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    env:
+      HUGO_VERSION: 0.161.1
+    steps:
+      - name: Install Hugo CLI
+        run: |
+          wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \
+          && sudo dpkg -i ${{ runner.temp }}/hugo.deb
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build site
+        run: hugo --minify
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --max-concurrency 8
+            --root-dir ${{ github.workspace }}/public
+            --accept 200..=299,403,429
+            --exclude '^https://gstv\.io'
+            --exclude '(shure|asus|intel|sony|fryette|adobe)\.com'
+            --exclude-path public/tags
+            --exclude-path public/categories
+            './public/**/*.html'
+          fail: true
+          token: ${{ secrets.GITHUB_TOKEN }}

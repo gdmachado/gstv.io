@@ -1,0 +1,126 @@
+/* Base layer: sticky header, focus ring, link colors, view transitions,
+   .list bg fix, and PaperMod's footer / tag-pill resets. */
+
+
+/* Sticky frosted-glass header. Falls back to a solid theme bg if the
+   browser does not support backdrop-filter. */
+header.header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background: color-mix(in srgb, var(--theme) 85%, transparent);
+    backdrop-filter: saturate(180%) blur(10px);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    border-bottom: 1px solid var(--border);
+    z-index: 1000000;
+}
+
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+    header.header { background: var(--theme); }
+}
+
+
+/* Visible keyboard-focus ring across the site. */
+:focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+a:focus-visible,
+button:focus-visible {
+    outline-offset: 3px;
+}
+
+/* Nav search: behaves like the other menu links, with a small kbd hint after the text */
+.menu a.nav-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.nav-search-kbd {
+    font-family: var(--font-mono);
+    font-size: 0.7em;
+    color: var(--secondary);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+    line-height: 1.4;
+    transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.menu a.nav-search:hover .nav-search-kbd {
+    color: var(--link);
+    border-color: color-mix(in srgb, var(--link) 30%, var(--border));
+    background: color-mix(in srgb, var(--link) 7%, var(--code-bg));
+}
+
+
+/* Link colors: PaperMod colors links inline, so force-tint via the new --link var */
+.post-content a,
+.post-content a:visited {
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--link) 35%, transparent);
+    text-underline-offset: 0.2em;
+    transition: color 150ms ease, text-decoration-color 150ms ease;
+}
+
+.post-content a:hover,
+.post-content a:focus-visible {
+    color: var(--link-hover);
+    text-decoration-color: var(--link-hover);
+}
+
+.profile_inner span a,
+.footer a {
+    color: var(--link);
+    text-decoration: none;
+}
+
+.profile_inner span a:hover,
+.footer a:hover {
+    color: var(--link-hover);
+}
+
+.footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.25rem;
+    align-items: baseline;
+}
+
+.footer-links {
+    color: var(--secondary);
+    font-size: 0.85rem;
+}
+
+.footer-links a {
+    color: var(--secondary);
+}
+
+.footer-links a:hover {
+    color: var(--link);
+}
+
+/* Cross-document view transitions (Chromium) */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none;
+    }
+}
+

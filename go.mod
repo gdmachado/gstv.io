@@ -1,7 +1,5 @@
 module github.com/gdmachado/gstv.io
 
-go 1.20
+go 1.23
 
-require (
-	github.com/adityatelange/hugo-PaperMod v0.0.0-20230401190456-031e2ba57ea2 // indirect
-)
+require github.com/adityatelange/hugo-PaperMod v0.0.0-20260503144622-c4ca7ca486ec // indirect

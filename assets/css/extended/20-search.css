@@ -1,0 +1,240 @@
+/* Header search nav pill + Cmd+K palette modal. */
+
+/* Nav search: behaves like the other menu links, with a small kbd hint after the text */
+.menu a.nav-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.nav-search-kbd {
+    font-family: var(--font-mono);
+    font-size: 0.7em;
+    color: var(--secondary);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+    line-height: 1.4;
+    transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.menu a.nav-search:hover .nav-search-kbd {
+    color: var(--link);
+    border-color: color-mix(in srgb, var(--link) 30%, var(--border));
+    background: color-mix(in srgb, var(--link) 7%, var(--code-bg));
+}
+
+/* Search palette (Cmd+K modal): styled as a Mac-window-flavored command palette.
+   Body bg is bumped a step lighter than --entry on dark so the palette reads as a
+   raised card against the page. */
+.search-palette {
+    width: min(36rem, 92vw);
+    max-height: 70vh;
+    padding: 0;
+    margin: 12vh auto 0;
+    background: var(--ctp-mocha-base);
+    color: var(--primary);
+    border: 1px solid var(--ctp-mocha-surface1);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 24px 64px rgba(0,0,0,0.55),
+        0 4px 12px rgba(0,0,0,0.3);
+}
+
+.search-palette[open] { display: flex; flex-direction: column; }
+
+.search-palette::backdrop {
+    background: rgba(8, 8, 12, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+html[data-theme="light"] .search-palette {
+    background: #ffffff;
+    border-color: var(--ctp-latte-surface1);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 24px 64px rgba(0,0,0,0.18),
+        0 4px 12px rgba(0,0,0,0.08);
+}
+
+html[data-theme="light"] .search-palette::backdrop {
+    background: rgba(40, 40, 48, 0.35);
+}
+
+.search-palette-titlebar {
+    display: grid;
+    grid-template-columns: 60px 1fr 60px;
+    align-items: center;
+    column-gap: 0.5rem;
+    padding: 0.5rem 0.85rem;
+    background: linear-gradient(180deg, var(--np-titlebar-hi, #3e4055), var(--np-titlebar, #313244));
+    border-bottom: 1px solid rgba(0,0,0,0.35);
+}
+
+html[data-theme="light"] .search-palette-titlebar {
+    background: linear-gradient(180deg, #d6dae4, var(--ctp-latte-surface0));
+    border-bottom-color: rgba(0,0,0,0.08);
+}
+
+.search-palette-traffic {
+    display: flex;
+    gap: 0.45rem;
+}
+
+.search-palette-title {
+    color: var(--ctp-mocha-subtext0);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-align: center;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+}
+
+html[data-theme="light"] .search-palette-title {
+    color: var(--ctp-latte-subtext0);
+}
+
+.search-palette-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.search-palette-input {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.search-palette-prompt {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    color: var(--ctp-mocha-green);
+    flex: none;
+}
+
+html[data-theme="light"] .search-palette-prompt { color: var(--ctp-latte-green); }
+
+.search-palette-input input {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--primary);
+    padding: 0;
+}
+
+.search-palette-input input::placeholder {
+    color: var(--secondary);
+    opacity: 0.7;
+}
+
+.search-palette-input kbd,
+.search-palette-empty kbd {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    background: var(--code-bg);
+    color: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+    line-height: 1.5;
+}
+
+.search-palette-empty {
+    padding: 1.4rem 1rem;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+}
+
+.search-palette-empty p { margin: 0.25rem 0; }
+
+.search-palette-empty-line { color: var(--ctp-mocha-subtext0); }
+html[data-theme="light"] .search-palette-empty-line { color: var(--ctp-latte-subtext0); }
+
+.search-palette-empty-hint {
+    color: var(--ctp-mocha-overlay0);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+html[data-theme="light"] .search-palette-empty-hint { color: var(--ctp-latte-overlay0); }
+
+.search-palette-empty-hint kbd { padding: 0.05em 0.4em; }
+.search-palette-sep { color: var(--tertiary); }
+
+.search-palette-results {
+    list-style: none;
+    margin: 0;
+    padding: 0.4rem 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.search-palette-result {
+    padding: 0.55rem 1rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background 100ms ease, border-color 100ms ease;
+}
+
+.search-palette-result.active {
+    background: color-mix(in srgb, var(--link) 9%, var(--entry));
+    border-left-color: var(--link);
+}
+
+.search-palette-result-title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--primary);
+    line-height: 1.2;
+    letter-spacing: -0.012em;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-palette-result-meta {
+    font-size: 0.78rem;
+    color: var(--secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-palette-result-path {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--tertiary);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-palette-result.active .search-palette-result-path {
+    color: var(--link);
+}
+
+@media (max-width: 480px) {
+    .nav-search-kbd { display: none; }
+    .menu a.nav-search { padding: 0.18rem 0.55rem; }
+}
+

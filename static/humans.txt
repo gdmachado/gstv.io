@@ -1,0 +1,13 @@
+/* TEAM */
+Author: Gus Machado
+Site: https://gstv.io
+Contact: hello@gstv.io
+GitHub: @gdmachado
+Location: London, UK
+
+/* SITE */
+Generator: Hugo (extended)
+Theme: PaperMod (modified)
+Hosting: GitHub Pages
+Source: https://github.com/gdmachado/gstv.io
+Standards: HTML5, CSS3

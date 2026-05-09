@@ -1,0 +1,130 @@
+/* Typography layer: Migra @font-face, heading rules, profile h1 (synthwave),
+   heading rhythm tokens, table rhythm, code-window vertical margin. */
+
+/* Self-hosted Migra (Pangram Pangram, free for personal use). Two cuts ship with
+   the free package; only Extrabold is in active use. Extralight stays loaded as a
+   future hook for editorial accents. */
+@font-face {
+    font-family: "Migra";
+    font-style: normal;
+    font-weight: 200 300;
+    font-display: swap;
+    src: url("/fonts/Migra-Extralight.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Migra";
+    font-style: normal;
+    font-weight: 700 900;
+    font-display: swap;
+    src: url("/fonts/Migra-Extrabold.woff2") format("woff2");
+}
+
+body, button, input, select, textarea {
+    font-family: var(--font-body);
+}
+
+code, kbd, pre, samp,
+.post-content code,
+.post-content pre,
+.highlight pre,
+.chroma {
+    font-family: var(--font-mono);
+}
+
+/* Headings + nav title use Migra (--font-serif) at 700. */
+.logo a,
+.post-title,
+.first-entry .entry-header h1,
+.entry-header h2,
+.page-header h1,
+.profile h1,
+.post-content h1,
+.post-content h2,
+.post-content h3,
+.post-content h4,
+.post-content h5,
+.post-content h6 {
+    font-family: var(--font-serif);
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: var(--leading-tight);
+    text-wrap: balance;
+}
+
+/* Sizes from the type scale */
+.profile h1 {
+    font-size: var(--text-display);
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    position: relative;
+}
+
+/* Profile h1: synthwave neon-sign treatment, always on. Warm cream tube color
+   on dark, with hot-magenta close halo bleeding into cyan further out. */
+.profile h1 {
+    color: #fff5e8;
+    text-shadow:
+        0 0 4px rgba(255, 245, 232, 0.6),
+        0 0 14px rgba(255, 16, 122, 0.95),
+        0 0 32px rgba(255, 16, 122, 0.65),
+        0 0 60px rgba(0, 224, 255, 0.5);
+}
+
+html[data-theme="light"] .profile h1 {
+    color: var(--primary);
+    text-shadow:
+        0 0 4px rgba(234, 118, 203, 0.55),
+        0 0 14px rgba(136, 57, 239, 0.4),
+        0 6px 22px rgba(32, 159, 181, 0.35);
+}
+
+.post-title,
+.first-entry .entry-header h1,
+.page-header h1 {
+    font-size: clamp(var(--text-2xl), 4vw, var(--text-3xl));
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+}
+
+/* Heading sizes + rhythm. H1 is pinned to --text-3xl so it always reads bigger than H2.
+   Larger headings use --leading-tight; H4-H6 use --leading-snug so descenders breathe. */
+.post-content h1 {
+    font-size: var(--text-3xl);
+    margin-top: 2.8rem;
+}
+.post-content h2 { font-size: var(--text-2xl); margin-top: 3rem;    line-height: var(--leading-tight); }
+.post-content h3 { font-size: var(--text-xl);  margin-top: 2.25rem; line-height: var(--leading-tight); }
+.post-content h4 { font-size: var(--text-lg);  margin-top: 1.75rem; line-height: var(--leading-snug); }
+.post-content h5 {
+    font-size: var(--text-base);
+    margin-top: 1.4rem;
+    line-height: var(--leading-snug);
+}
+.post-content h6 {
+    font-size: var(--text-sm);
+    margin-top: 1.1rem;
+    line-height: var(--leading-snug);
+    color: var(--secondary);
+}
+
+/* A heading owns the block beneath it: tighten the gap to the first paragraph that follows */
+.post-content h1 + p,
+.post-content h2 + p,
+.post-content h3 + p,
+.post-content h4 + p { margin-top: 0.6rem; }
+
+/* Tables: visible rhythm + padded cells + tabular numerals */
+.post-content table {
+    margin: 2.25rem 0;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+}
+
+.post-content th,
+.post-content td {
+    padding: 0.55rem 0.85rem;
+}
+
+/* Code windows match heading rhythm so an H2 + code-block doesn't visually glue */
+.code-window { margin: 2.25rem 0; }

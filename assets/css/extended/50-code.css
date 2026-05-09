@@ -1,0 +1,138 @@
+/* Ghostty-style code window + chroma table layout + copy button. */
+
+/* ──────────────── Code blocks: Ghostty/Mac window aesthetic ──────────────── */
+.code-window {
+    --cw-titlebar:    var(--ctp-mocha-surface0);
+    --cw-titlebar-hi: #3e4055;
+    --cw-border:      var(--ctp-mocha-surface1);
+    --cw-muted:       var(--ctp-mocha-subtext0);
+    --cw-shadow:      rgba(0,0,0,0.30);
+
+    position: relative;
+    margin: 1.75rem 0;
+    border: 1px solid var(--cw-border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 12px 28px var(--cw-shadow),
+        0 2px 6px rgba(0,0,0,0.18);
+}
+
+html[data-theme="light"] .code-window {
+    --cw-titlebar:    var(--ctp-latte-surface0);
+    --cw-titlebar-hi: #d6dae4;
+    --cw-border:      var(--ctp-latte-surface1);
+    --cw-muted:       var(--ctp-latte-subtext0);
+    --cw-shadow:      rgba(0,0,0,0.08);
+}
+
+.code-titlebar {
+    display: grid;
+    grid-template-columns: 60px 1fr 60px;
+    align-items: center;
+    column-gap: 0.5rem;
+    padding: 0.5rem 0.85rem;
+    background: linear-gradient(180deg, var(--cw-titlebar-hi), var(--cw-titlebar));
+    border-bottom: 1px solid rgba(0,0,0,0.35);
+    user-select: none;
+}
+
+html[data-theme="light"] .code-titlebar {
+    border-bottom-color: rgba(0,0,0,0.08);
+}
+
+.code-traffic {
+    display: flex;
+    gap: 0.45rem;
+}
+
+.code-lang {
+    color: var(--cw-muted);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-align: center;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Strip PaperMod's inner radius / margin so our chrome owns the corners */
+.code-window .highlight {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: var(--code-block-bg) !important;
+}
+
+.code-window pre.chroma,
+.code-window .highlight pre {
+    margin: 0;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* Line-number column: subtle separator */
+.code-window .lntable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.code-window .lntable .lntd:first-child {
+    background: rgba(0,0,0,0.18);
+    width: 1%;            /* shrinks to numbers' natural width */
+    white-space: nowrap;
+    border-right: 1px solid rgba(0,0,0,0.25);
+}
+
+html[data-theme="light"] .code-window .lntable .lntd:first-child {
+    background: rgba(0,0,0,0.04);
+    border-right-color: rgba(0,0,0,0.08);
+}
+
+.code-window .lnt {
+    user-select: none;
+    padding: 0 0.6rem;
+}
+
+/* Re-position PaperMod's copy button into the titlebar at top-right */
+.code-window .copy-code {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.7rem;
+    display: none;
+    background: rgba(255,255,255,0.06);
+    color: var(--cw-muted);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 5px;
+    padding: 2px 9px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.45;
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.code-window:hover .copy-code,
+.code-window:focus-within .copy-code { display: block; }
+
+.code-window .copy-code:hover {
+    background: rgba(255,255,255,0.12);
+    color: var(--ctp-mocha-text);
+    border-color: rgba(255,255,255,0.18);
+}
+
+html[data-theme="light"] .code-window .copy-code {
+    background: rgba(0,0,0,0.04);
+    color: var(--ctp-latte-subtext0);
+    border-color: rgba(0,0,0,0.08);
+}
+
+html[data-theme="light"] .code-window .copy-code:hover {
+    background: rgba(0,0,0,0.08);
+    color: var(--ctp-latte-text);
+    border-color: rgba(0,0,0,0.14);
+}

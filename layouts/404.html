@@ -1,0 +1,21 @@
+{{- define "main" }}
+<div class="not-found">
+  <h1 class="not-found-code">404</h1>
+  <pre class="not-found-prompt" aria-hidden="true">~ cat <span id="not-found-path">/this-page</span>
+cat: <span id="not-found-path-err">/this-page</span>: No such file or directory</pre>
+  <p class="not-found-meta">the page you were looking for has wandered off, or never existed in the first place.</p>
+  <nav class="not-found-actions" aria-label="suggested destinations">
+    <a href="{{ "" | absLangURL }}">home</a>
+    <a href="{{ "posts/" | absLangURL }}">posts</a>
+    <a href="{{ "photos/" | absLangURL }}">photos</a>
+    <a href="{{ "search/" | absLangURL }}">search</a>
+  </nav>
+  <script>
+    (function () {
+      var p = window.location.pathname || "/this-page";
+      var els = document.querySelectorAll("#not-found-path, #not-found-path-err");
+      els.forEach(function (el) { el.textContent = p; });
+    })();
+  </script>
+</div>
+{{- end }}

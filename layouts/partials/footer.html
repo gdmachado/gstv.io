@@ -1,15 +1,12 @@
 {{- if not (.Param "hideFooter") }}
 <footer class="footer">
-    {{- if site.Copyright }}
-    <span>{{ site.Copyright | markdownify }}</span>
-    {{- else }}
-    <span>&copy; {{ now.Year }} <a href="{{ "" | absLangURL }}">{{ site.Title }}</a></span>
-    {{- end }}
-    {{/*  <span>
-        Powered by
-        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
-        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
-    </span>  */}}
+    <span class="footer-meta">&copy; {{ now.Year }} | <a href="{{ "" | absLangURL }}">{{ site.Title }}</a> | <a href="https://creativecommons.org/licenses/by-nc/4.0/" rel="license"><code>CC BY-NC 4.0</code></a></span>
+    <span class="footer-links">
+        <a href="{{ "colophon/" | absLangURL }}">colophon</a> ·
+        <a href="{{ "typography/" | absLangURL }}">typography</a> ·
+        <a href="{{ "archives/" | absLangURL }}">archive</a> ·
+        <a href="{{ "index.xml" | absLangURL }}">rss</a>
+    </span>
 </footer>
 {{- end }}
 
@@ -72,14 +69,15 @@
 {{- if (not site.Params.disableThemeToggle) }}
 <script>
     document.getElementById("theme-toggle").addEventListener("click", () => {
-        if (document.body.className.includes("dark")) {
-            document.body.classList.remove('dark');
+        const html = document.documentElement;
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
             localStorage.setItem("pref-theme", 'light');
             {{- if and (site.Params.comments) (site.Params.comments.giscus) }}
             changeGiscusTheme({{ site.Params.comments.giscus.theme_light }});
             {{- end }}
         } else {
-            document.body.classList.add('dark');
+            html.dataset.theme = 'dark';
             localStorage.setItem("pref-theme", 'dark');
             {{- if and (site.Params.comments) (site.Params.comments.giscus) }}
             changeGiscusTheme({{ site.Params.comments.giscus.theme_dark }});
