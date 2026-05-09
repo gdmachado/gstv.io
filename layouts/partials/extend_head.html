@@ -20,7 +20,7 @@
 
 {{- $posts := where site.RegularPages "Section" "posts" }}
 {{- $photos := where site.RegularPages "Section" "photos" }}
-{{- $siteInfo := dict "hugo" hugo.Version "builtAt" (now.Format "2006-01-02") "posts" (len $posts) "photos" (len $photos) }}
+{{- $siteInfo := dict "hugo" hugo.Version "builtAt" (now.Format "2006-01-02") "buildId" now.Unix "posts" (len $posts) "photos" (len $photos) }}
 <script>window.__SITE__ = {{ $siteInfo | jsonify | safeJS }};</script>
 
 {{- $settings := resources.Get "js/settings.js" | minify | fingerprint }}

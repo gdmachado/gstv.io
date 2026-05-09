@@ -201,7 +201,10 @@
 
   function init() {
     const altLink = document.querySelector('link[type="application/json"]');
-    indexUrl = altLink ? altLink.href : "/index.json";
+    const baseUrl = altLink ? altLink.href : "/index.json";
+    /* Cache-bust per build so a redeployed index isn't masked by a force-cached copy. */
+    const buildId = (window.__SITE__ && window.__SITE__.buildId) || "";
+    indexUrl = buildId ? `${baseUrl}?v=${buildId}` : baseUrl;
     buildDialog();
     decorateNavSearch();
     document.addEventListener("keydown", (e) => {
