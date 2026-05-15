@@ -4,10 +4,10 @@ date: 2022-10-04T16:17:24+01:00
 # weight: 1
 # aliases: ["/first"]
 tags:
-- ai
-- technology
-- stablediffusion
-- latentdiffusion
+  - AI
+  - Image Generation
+  - Stable Diffusion
+  - Textual Inversion
 
 author: "Gus Machado"
 license: "CC BY 4.0"

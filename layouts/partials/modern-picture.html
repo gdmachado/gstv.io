@@ -1,0 +1,49 @@
+{{- $page := .page -}}
+{{- $image := .image -}}
+{{- $alt := .alt | default "" -}}
+{{- $title := .title | default "" -}}
+{{- $loading := .loading | default "lazy" -}}
+{{- $decoding := .decoding | default "async" -}}
+{{- $width := $image.Width -}}
+{{- $height := $image.Height -}}
+{{- if isset . "width" -}}
+  {{- $width = .width -}}
+{{- end -}}
+{{- if isset . "height" -}}
+  {{- $height = .height -}}
+{{- end -}}
+{{- $fragment := .fragment | default "" -}}
+{{- $pictureClass := .pictureClass | default "" -}}
+{{- $imageClass := .imageClass | default "" -}}
+
+{{- $avifName := replaceRE "\\.[^.]+$" ".avif" $image.Name -}}
+{{- $webpName := replaceRE "\\.[^.]+$" ".webp" $image.Name -}}
+{{- $avif := false -}}
+{{- $webp := false -}}
+{{- with $page -}}
+  {{- $avif = .Resources.GetMatch $avifName -}}
+  {{- $webp = .Resources.GetMatch $webpName -}}
+{{- end -}}
+
+{{- $src := $image.RelPermalink -}}
+{{- with $fragment -}}
+  {{- $src = printf "%s#%s" $src . -}}
+{{- end -}}
+
+<picture{{ with $pictureClass }} class="{{ . }}"{{ end }}>
+  {{- with $avif }}
+  <source srcset="{{ .RelPermalink }}" type="image/avif">
+  {{- end }}
+  {{- with $webp }}
+  <source srcset="{{ .RelPermalink }}" type="image/webp">
+  {{- end }}
+  <img
+    loading="{{ $loading }}"
+    decoding="{{ $decoding }}"
+    src="{{ $src }}"
+    {{- with $width }} width="{{ . }}"{{ end }}
+    {{- with $height }} height="{{ . }}"{{ end }}
+    {{- with $imageClass }} class="{{ . }}"{{ end }}
+    {{- with $title }} title="{{ . }}"{{ end }}
+    alt="{{ $alt }}">
+</picture>

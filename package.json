@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test:review": "bun scripts/check-review-regressions.mjs",
+    "images": "bun scripts/generate-modern-images.mjs",
     "highlight": "bun scripts/shiki-highlight.mjs",
     "build:hugo": "hugo --gc --minify",
     "build": "bun run build:hugo && bun run highlight",

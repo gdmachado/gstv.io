@@ -9,6 +9,10 @@ dev:
 build: clean
     bun run build
 
+# Generate AVIF and WebP sidecars for content images
+images:
+    bun run images
+
 # Remove generated artifacts
 clean:
     rm -rf public resources
