@@ -27,13 +27,14 @@ This site is intentionally small and boring infrastructure-wise, so it can sit u
 - **Diagrams:** [Mermaid](https://mermaid.js.org/) via shortcode.
 - **Math:** [KaTeX](https://katex.org/) via shortcode.
 - **Comments:** [giscus](https://giscus.app), backed by GitHub Discussions.
+- **Authoring notes:** `AUTHORING.md` in the repository root.
 
 ## Typography
 
-- **Body:** [Cabinet Grotesk](https://fontshare.com/fonts/cabinet-grotesk) by Indian Type Foundry.
+- **Body:** Roc Grotesk via Adobe Fonts, loaded from the configured web project kit.
 - **Display headings:** [Migra](https://pangrampangram.com/products/migra) by Pangram Pangram (free for personal use).
 - **Monospace:** [Geist Mono](https://vercel.com/font) by Vercel, with [JetBrains Mono](https://www.jetbrains.com/lp/mono/) as an optional swap via the settings menu.
-- **Code highlighting:** Chroma with class-based output, paired with [Catppuccin Mocha](https://github.com/catppuccin/catppuccin) for dark and Latte for light.
+- **Code highlighting:** [Shiki](https://shiki.style/) as a post-processing step after Hugo, with custom Catppuccin-inspired surfaces and an optional colorblind-safe syntax mode.
 
 A live preview of the type system lives on the [typography page](/typography/).
 

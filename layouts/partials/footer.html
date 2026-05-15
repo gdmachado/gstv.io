@@ -91,39 +91,83 @@
 {{- if (and (eq .Kind "page") (ne .Layout "archives") (ne .Layout "search") (.Param "ShowCodeCopyButtons")) }}
 <script>
     document.querySelectorAll('pre > code').forEach((codeblock) => {
-        const container = codeblock.parentNode.parentNode;
+        const codeWindow = codeblock.closest('.code-window');
+        if (codeWindow && codeblock.closest('.lntable') && !codeblock.closest('.lntd:last-child')) {
+            return;
+        }
+
+        const container = codeWindow
+            ? (codeWindow.querySelector('.code-frame') || codeWindow)
+            : codeblock.parentNode.parentNode;
+
+        if (codeWindow && Array.from(container.children).some((child) => child.classList.contains('copy-code'))) {
+            return;
+        }
 
         const copybutton = document.createElement('button');
         copybutton.classList.add('copy-code');
-        copybutton.innerHTML = '{{- i18n "code_copy" | default "copy" }}';
+        copybutton.type = 'button';
+        copybutton.setAttribute('aria-label', '{{- i18n "code_copy" | default "Copy code" }}');
+        copybutton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 
         function copyingDone() {
-            copybutton.innerHTML = '{{- i18n "code_copied" | default "copied!" }}';
+            copybutton.classList.add('copied');
+            copybutton.setAttribute('aria-label', '{{- i18n "code_copied" | default "Copied" }}');
             setTimeout(() => {
-                copybutton.innerHTML = '{{- i18n "code_copy" | default "copy" }}';
-            }, 2000);
+                copybutton.classList.remove('copied');
+                copybutton.setAttribute('aria-label', '{{- i18n "code_copy" | default "Copy code" }}');
+            }, 1500);
         }
 
-        copybutton.addEventListener('click', (cb) => {
-            if ('clipboard' in navigator) {
-                navigator.clipboard.writeText(codeblock.textContent);
-                copyingDone();
-                return;
+        function getCodeText() {
+            if (codeblock.dataset.rawCode) {
+                try {
+                    return decodeURIComponent(codeblock.dataset.rawCode);
+                } catch (e) { }
             }
 
-            const range = document.createRange();
-            range.selectNodeContents(codeblock);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
+            const clone = codeblock.cloneNode(true);
+            clone.querySelectorAll('.line-number').forEach((lineNumber) => lineNumber.remove());
+            const lines = Array.from(clone.querySelectorAll('.line'));
+            if (lines.length) {
+                return lines.map((line) => {
+                    const code = line.querySelector('.line-code');
+                    return code ? code.textContent : line.textContent;
+                }).join('\n');
+            }
+
+            return clone.textContent;
+        }
+
+        function writeFallback(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.inset = '0 auto auto 0';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
             try {
                 document.execCommand('copy');
                 copyingDone();
-            } catch (e) { };
-            selection.removeRange(range);
+            } catch (e) { }
+            textarea.remove();
+        }
+
+        copybutton.addEventListener('click', () => {
+            const copyText = getCodeText();
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(copyText).then(copyingDone, () => writeFallback(copyText));
+                return;
+            }
+
+            writeFallback(copyText);
         });
 
-        if (container.classList.contains("highlight")) {
+        if (codeWindow) {
+            container.appendChild(copybutton);
+        } else if (container.classList.contains("highlight")) {
             container.appendChild(copybutton);
         } else if (container.parentNode.firstChild == container) {
             // td containing LineNos

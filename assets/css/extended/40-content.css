@@ -65,8 +65,15 @@ html[data-theme="light"] .profile_inner img {
 }
 
 /* Inline code: subtle border in light mode for definition; size & padding from PaperMod */
+.post-content :not(pre) > code,
+.md-content :not(pre) > code {
+    color: var(--link);
+    background: color-mix(in srgb, var(--link) 12%, var(--code-bg));
+}
+
 html[data-theme="light"] :not(pre) > code {
     border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--link) 8%, var(--code-bg));
 }
 
 /* Code blocks: lift slightly with subtle shadow on light bg */
@@ -103,48 +110,75 @@ html[data-theme="light"] .post-content th {
 
 /* Callouts */
 .callout {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.75rem;
-    margin: 1.5rem 0;
-    padding: 1rem 1.25rem;
-    border-radius: var(--radius);
-    border: 1px solid color-mix(in srgb, var(--callout-accent, var(--primary)) 28%, transparent);
-    border-left: 4px solid var(--callout-accent, var(--primary));
-    background: color-mix(in srgb, var(--callout-accent, var(--primary)) 8%, var(--entry));
+    --callout-surface: color-mix(in srgb, var(--callout-accent, var(--link)) 16%, var(--theme));
+    --callout-border: color-mix(in srgb, var(--callout-accent, var(--link)) 62%, var(--border));
+    position: relative;
+    margin: 1.7rem 0;
+    padding: 1.35rem 1.65rem;
+    border-radius: 8px;
+    border: 1px solid var(--callout-border);
+    background: var(--callout-surface);
+    overflow: hidden;
+    transition:
+        background-color 500ms ease,
+        border-color 250ms ease;
+}
+
+.callout-kicker {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0 0.85rem;
+    color: var(--primary);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.035em;
+    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .callout-icon {
-    font-size: 1.1rem;
-    line-height: 1.4;
-    color: var(--callout-accent, var(--primary));
-    align-self: start;
-    padding-top: 0.05rem;
+    display: none;
+}
+
+.callout-body {
+    color: var(--primary);
+    font-size: 1.02rem;
+    line-height: 1.65;
 }
 
 .callout-body > :first-child { margin-top: 0; }
 .callout-body > :last-child { margin-bottom: 0; }
 
-.callout-title {
+.callout-body a {
+    color: var(--callout-accent, var(--link));
     font-weight: 600;
-    margin: 0 0 0.35rem;
-    color: var(--callout-accent, var(--primary));
-    text-transform: uppercase;
-    font-size: 0.78rem;
-    letter-spacing: 0.05em;
+    text-decoration: none;
+}
+
+.post-content .callout-body :not(pre) > code,
+.md-content .callout-body :not(pre) > code {
+    color: var(--link);
+    background: color-mix(in srgb, var(--link) 12%, var(--code-bg));
+}
+
+html[data-theme="light"] .post-content .callout-body :not(pre) > code,
+html[data-theme="light"] .md-content .callout-body :not(pre) > code {
+    border-color: var(--border);
+    background: color-mix(in srgb, var(--link) 8%, var(--code-bg));
 }
 
 /* Dark theme: Mocha accents */
-.callout-note    { --callout-accent: #74c7ec; } /* sapphire */
+.callout-note    { --callout-accent: #89b4fa; } /* blue */
 .callout-tip     { --callout-accent: #a6e3a1; } /* green */
-.callout-info    { --callout-accent: #89b4fa; } /* blue */
+.callout-info    { --callout-accent: #74c7ec; } /* sapphire */
 .callout-warning { --callout-accent: #f9e2af; } /* yellow */
 .callout-danger  { --callout-accent: #f38ba8; } /* red */
 
 /* Light theme: Latte accents (more saturated, darker for legibility on white) */
 html[data-theme="light"] .callout-note    { --callout-accent: #209fb5; }
 html[data-theme="light"] .callout-tip     { --callout-accent: #40a02b; }
-html[data-theme="light"] .callout-info    { --callout-accent: #1e66f5; }
+html[data-theme="light"] .callout-info    { --callout-accent: #209fb5; }
 html[data-theme="light"] .callout-warning { --callout-accent: #df8e1d; }
 html[data-theme="light"] .callout-danger  { --callout-accent: #d20f39; }
 
@@ -155,6 +189,192 @@ html[data-syntax="cb"] .callout-tip     { --callout-accent: #009e73; }
 html[data-syntax="cb"] .callout-info    { --callout-accent: #0072b2; }
 html[data-syntax="cb"] .callout-warning { --callout-accent: #e69f00; }
 html[data-syntax="cb"] .callout-danger  { --callout-accent: #d55e00; }
+
+/* Article layout: optional right-hand table of contents */
+.post-single-with-toc {
+    --article-width: var(--main-width);
+    --article-half-width: 400px;
+    max-width: var(--article-width);
+}
+
+.post-single-with-toc > .post-header,
+.post-single-with-toc > .entry-cover,
+.post-single-with-toc > .post-footer {
+    max-width: var(--main-width);
+    margin-inline: auto;
+}
+
+.post-body-shell {
+    display: block;
+}
+
+.post-body-shell.has-toc {
+    display: block;
+}
+
+.post-body-main {
+    min-width: 0;
+}
+
+.post-sidebar {
+    position: fixed;
+    top: 7rem;
+    left: calc(50% + var(--article-half-width) + 2.25rem);
+    width: min(16rem, calc(50vw - var(--article-half-width) - 2.75rem));
+    max-height: calc(100vh - 7rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.2rem 0 1rem;
+    z-index: 3;
+}
+
+.docs-toc {
+    --toc-active-y: 2.6rem;
+    --toc-active-h: 1.5rem;
+    position: relative;
+    padding-left: 1rem;
+    color: var(--secondary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    overflow-x: hidden;
+}
+
+.docs-toc::before {
+    content: "";
+    position: absolute;
+    top: 2.45rem;
+    bottom: 0.35rem;
+    left: 0.19rem;
+    width: 1px;
+    background: color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+.toc-active-marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: var(--toc-active-h);
+    border-radius: 999px;
+    background: var(--link);
+    transform: translateY(var(--toc-active-y));
+    transition:
+        transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        height 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        background 180ms ease;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--link) 45%, transparent);
+}
+
+.toc-title {
+    margin: 0 0 0.7rem;
+    color: var(--primary);
+    font-family: var(--font-body);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.docs-toc nav,
+.docs-toc ul {
+    margin: 0;
+    padding: 0;
+}
+
+.docs-toc .inner {
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+}
+
+.docs-toc ul {
+    list-style: none;
+}
+
+.docs-toc li {
+    margin: 0;
+}
+
+.docs-toc li ul {
+    margin-left: 0.75rem;
+}
+
+.docs-toc a {
+    display: block;
+    padding: 0.25rem 0 0.25rem 0.05rem;
+    color: var(--secondary);
+    font: inherit;
+    line-height: 20px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+    transition:
+        color 180ms ease,
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 180ms ease;
+}
+
+.docs-toc a:hover,
+.docs-toc a:focus-visible {
+    color: var(--primary);
+}
+
+.docs-toc a.is-active {
+    color: var(--link);
+    font-weight: 600;
+    transform: translateX(0.18rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toc-active-marker,
+    .docs-toc a {
+        transition: none;
+    }
+}
+
+@media (max-width: 1220px) {
+    .post-single-with-toc,
+    .post-single-with-toc > .post-header,
+    .post-single-with-toc > .entry-cover,
+    .post-single-with-toc > .post-footer {
+        max-width: var(--main-width);
+    }
+
+    .post-body-shell.has-toc {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 1.5rem;
+    }
+
+    .post-sidebar {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        max-height: none;
+        padding: 0;
+        overflow: visible;
+    }
+
+    .docs-toc {
+        padding: 1rem 1rem 1rem 1.25rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--entry);
+    }
+
+    .docs-toc::before {
+        top: 3.2rem;
+        bottom: 1rem;
+        left: 0.8rem;
+    }
+
+    .toc-active-marker {
+        left: 0.61rem;
+    }
+}
 
 /* Mermaid: keep theme-friendly background, remove default white box */
 pre.mermaid {

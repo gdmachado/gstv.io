@@ -3,11 +3,11 @@ default:
 
 # Run a local dev server with drafts and future posts
 dev:
-    hugo server --buildDrafts --buildFuture --navigateToChanged
+    bun run dev
 
 # Production build (matches GitHub Actions)
 build: clean
-    hugo --gc --minify
+    bun run build
 
 # Remove generated artifacts
 clean:
@@ -24,4 +24,6 @@ update-theme:
 
 # Build with verbose logging so deprecations surface
 check: clean
-    hugo --gc --minify --logLevel info
+    bun run test:review
+    bun run build:hugo -- --logLevel info
+    bun run highlight

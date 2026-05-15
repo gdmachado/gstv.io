@@ -1,16 +1,18 @@
 {{- $kind := .Get "kind" | default "note" -}}
 {{- $title := .Get "title" -}}
 <aside class="callout callout-{{ $kind }}" role="note">
-  <div class="callout-icon" aria-hidden="true">
-    {{- if eq $kind "tip" }}&#9728;
-    {{- else if eq $kind "warning" }}&#9888;
-    {{- else if eq $kind "danger" }}&#9876;
-    {{- else if eq $kind "info" }}&#9432;
-    {{- else }}&#9998;
-    {{- end -}}
+  <div class="callout-kicker">
+    <span class="callout-icon" aria-hidden="true">
+      {{- if eq $kind "tip" }}+
+      {{- else if eq $kind "warning" }}!
+      {{- else if eq $kind "danger" }}x
+      {{- else if eq $kind "info" }}i
+      {{- else }}#
+      {{- end -}}
+    </span>
+    <span>{{ with $title }}{{ . }}{{ else }}{{ $kind }}{{ end }}</span>
   </div>
   <div class="callout-body">
-    {{- with $title }}<p class="callout-title">{{ . }}</p>{{ end }}
     {{ .Inner | $.Page.RenderString }}
   </div>
 </aside>

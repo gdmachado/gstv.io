@@ -4,7 +4,7 @@
 html[data-mono="jetbrains"] { --font-mono: var(--font-mono-jetbrains); }
 html[data-mono="geist"]     { --font-mono: var(--font-mono-geist); }
 
-html[data-sans="cabinet"]  { --font-body: var(--font-body-cabinet); }
+html[data-sans="roc"]      { --font-body: var(--font-body-roc); }
 html[data-sans="atkinson"] { --font-body: var(--font-body-atkinson); }
 
 
@@ -220,4 +220,3 @@ html[data-theme="light"] .settings-popover-footer kbd {
 html[data-theme="light"] .settings-popover label input[type="radio"] {
     border-color: var(--ctp-latte-overlay0);
 }
-

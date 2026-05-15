@@ -1,69 +1,108 @@
-/* Ghostty-style code window + chroma table layout + copy button. */
+/* Code window + Shiki line layout + copy button. */
 
-/* ──────────────── Code blocks: Ghostty/Mac window aesthetic ──────────────── */
 .code-window {
-    --cw-titlebar:    var(--ctp-mocha-surface0);
-    --cw-titlebar-hi: #3e4055;
-    --cw-border:      var(--ctp-mocha-surface1);
-    --cw-muted:       var(--ctp-mocha-subtext0);
-    --cw-shadow:      rgba(0,0,0,0.30);
+    --cw-bg: var(--ctp-mocha-base);
+    --cw-border: color-mix(in srgb, var(--ctp-mocha-blue) 22%, var(--ctp-mocha-surface0));
+    --cw-muted: var(--ctp-mocha-overlay1);
+    --cw-title-bg: color-mix(in srgb, var(--ctp-mocha-surface0) 52%, var(--ctp-mocha-base));
+    --cw-copy-bg: var(--ctp-mocha-surface0);
+    --cw-copy-hover-bg: var(--ctp-mocha-surface1);
+    --cw-copy-border: color-mix(in srgb, var(--ctp-mocha-blue) 14%, var(--ctp-mocha-surface1));
+    --cw-copy-accent-soft: color-mix(in srgb, var(--link) 15%, transparent);
+    --cw-copy-on-accent: var(--ctp-mocha-base);
 
     position: relative;
-    margin: 1.75rem 0;
+    margin: 2rem 0;
     border: 1px solid var(--cw-border);
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow:
-        0 1px 0 rgba(255,255,255,0.04) inset,
-        0 12px 28px var(--cw-shadow),
-        0 2px 6px rgba(0,0,0,0.18);
+    background: var(--cw-bg);
+    box-shadow: none;
 }
 
 html[data-theme="light"] .code-window {
-    --cw-titlebar:    var(--ctp-latte-surface0);
-    --cw-titlebar-hi: #d6dae4;
-    --cw-border:      var(--ctp-latte-surface1);
-    --cw-muted:       var(--ctp-latte-subtext0);
-    --cw-shadow:      rgba(0,0,0,0.08);
+    --cw-bg: var(--ctp-latte-base);
+    --cw-border: color-mix(in srgb, var(--ctp-latte-blue) 18%, var(--ctp-latte-surface0));
+    --cw-muted: var(--ctp-latte-subtext0);
+    --cw-title-bg: color-mix(in srgb, var(--ctp-latte-mantle) 70%, var(--ctp-latte-base));
+    --cw-copy-bg: var(--ctp-latte-mantle);
+    --cw-copy-hover-bg: var(--entry);
+    --cw-copy-border: var(--ctp-latte-surface0);
+    --cw-copy-accent-soft: color-mix(in srgb, var(--link) 10%, transparent);
+    --cw-copy-on-accent: #ffffff;
 }
 
-.code-titlebar {
-    display: grid;
-    grid-template-columns: 60px 1fr 60px;
+.md-content .code-window > .code-titlebar {
+    display: flex;
     align-items: center;
-    column-gap: 0.5rem;
-    padding: 0.5rem 0.85rem;
-    background: linear-gradient(180deg, var(--cw-titlebar-hi), var(--cw-titlebar));
-    border-bottom: 1px solid rgba(0,0,0,0.35);
+    gap: 0.6rem;
+    min-height: 3rem;
+    margin: 0;
+    padding: 0 1.15rem;
+    border-bottom: 1px solid var(--cw-border);
+    background: var(--cw-title-bg);
+    color: var(--primary);
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 650;
+    line-height: 1;
     user-select: none;
 }
 
-html[data-theme="light"] .code-titlebar {
-    border-bottom-color: rgba(0,0,0,0.08);
-}
-
-.code-traffic {
-    display: flex;
-    gap: 0.45rem;
-}
-
-.code-lang {
+.code-file-icon {
     color: var(--cw-muted);
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    text-align: center;
-    text-transform: lowercase;
-    letter-spacing: 0.02em;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: -0.08em;
+}
+
+.code-file-name {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-/* Strip PaperMod's inner radius / margin so our chrome owns the corners */
+.code-frame {
+    position: relative;
+    background: var(--cw-bg);
+}
+
+.code-lang {
+    position: absolute;
+    top: 0.9rem;
+    right: 1rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.2rem;
+    color: var(--cw-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    user-select: none;
+    transition:
+        color 400ms ease,
+        opacity 250ms ease,
+        transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Strip PaperMod's inner radius / margin so our chrome owns the corners. */
 .code-window .highlight {
     margin: 0 !important;
     border-radius: 0 !important;
-    background: var(--code-block-bg) !important;
+    background: var(--cw-bg) !important;
+    overflow-x: auto;
+}
+
+.code-window .shiki-source {
+    margin: 0;
+    padding: 1.7rem 0;
+    background: var(--cw-bg);
+    overflow-x: auto;
+    scrollbar-gutter: stable;
 }
 
 .code-window pre.chroma,
@@ -75,64 +114,212 @@ html[data-theme="light"] .code-titlebar {
     background: transparent !important;
 }
 
-/* Line-number column: subtle separator */
-.code-window .lntable {
-    width: 100%;
-    border-collapse: collapse;
+.md-content .code-window pre code {
+    display: block;
+    margin: 0;
+    padding: 0 !important;
+    color: inherit;
+    background: transparent !important;
+    border-radius: 0;
+    overflow: visible;
+    white-space: pre;
+    word-break: normal;
 }
 
-.code-window .lntable .lntd:first-child {
-    background: rgba(0,0,0,0.18);
-    width: 1%;            /* shrinks to numbers' natural width */
-    white-space: nowrap;
-    border-right: 1px solid rgba(0,0,0,0.25);
+.code-window .shiki-code {
+    min-width: max-content;
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.75;
+    tab-size: 4;
 }
 
-html[data-theme="light"] .code-window .lntable .lntd:first-child {
-    background: rgba(0,0,0,0.04);
-    border-right-color: rgba(0,0,0,0.08);
+.code-window .shiki-code .line {
+    display: grid;
+    grid-template-columns: 3.4rem max-content;
+    min-height: 1.75em;
 }
 
-.code-window .lnt {
+.code-window .line-number {
+    padding: 0 1.05rem 0 0.85rem;
+    color: var(--cw-muted);
+    text-align: right;
     user-select: none;
-    padding: 0 0.6rem;
 }
 
-/* Re-position PaperMod's copy button into the titlebar at top-right */
+.code-window .line-code {
+    min-width: max-content;
+    padding-right: 5.25rem;
+}
+
+.code-window .tok-keyword,
+.code-window .tok-entity,
+.code-window .tok-support,
+.code-window .tok-constant {
+    font-weight: 650;
+}
+
+.code-window .tok-comment {
+    font-style: italic;
+}
+
+.code-window .tok-operator,
+.code-window .tok-punctuation {
+    font-weight: 500;
+}
+
+html[data-theme="dark"] .code-window .shiki-code .tok {
+    color: var(--shiki-dark) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+html[data-theme="light"][data-syntax="cb"] .code-window {
+    --cb-code-text: #1f2430;
+    --cb-code-keyword: #0072b2;
+    --cb-code-entity: #cc79a7;
+    --cb-code-support: #009e73;
+    --cb-code-string: #d55e00;
+    --cb-code-constant: #e69f00;
+    --cb-code-comment: #667085;
+    --cb-code-variable: #1f2430;
+    --cb-code-operator: #4b5565;
+    --cb-code-punctuation: #5d6678;
+}
+
+html[data-theme="dark"][data-syntax="cb"] .code-window,
+html:not([data-theme="light"])[data-syntax="cb"] .code-window {
+    --cb-code-text: #e6e8f2;
+    --cb-code-keyword: #56b4e9;
+    --cb-code-entity: #cc79a7;
+    --cb-code-support: #009e73;
+    --cb-code-string: #f0e442;
+    --cb-code-constant: #e69f00;
+    --cb-code-comment: #8fa1b3;
+    --cb-code-variable: #e6e8f2;
+    --cb-code-operator: #d0d7e2;
+    --cb-code-punctuation: #aeb8ca;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok {
+    color: var(--cb-code-text) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-keyword {
+    color: var(--cb-code-keyword) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-entity {
+    color: var(--cb-code-entity) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-support {
+    color: var(--cb-code-support) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-string {
+    color: var(--cb-code-string) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-constant {
+    color: var(--cb-code-constant) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-comment {
+    color: var(--cb-code-comment) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-variable {
+    color: var(--cb-code-variable) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-operator {
+    color: var(--cb-code-operator) !important;
+}
+
+html[data-syntax="cb"] .code-window .shiki-code .tok-punctuation {
+    color: var(--cb-code-punctuation) !important;
+}
+
 .code-window .copy-code {
     position: absolute;
-    top: 0.45rem;
-    right: 0.7rem;
-    display: none;
-    background: rgba(255,255,255,0.06);
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 3;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--cw-copy-border);
+    border-radius: 4px;
+    background: transparent;
     color: var(--cw-muted);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 5px;
-    padding: 2px 9px;
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    line-height: 1.45;
+    font-size: 0;
+    line-height: 1;
+    opacity: 0;
+    overflow: visible;
     cursor: pointer;
-    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+    flex-shrink: 0;
+    transition:
+        opacity 150ms cubic-bezier(0.16, 1, 0.3, 1),
+        background 150ms cubic-bezier(0.16, 1, 0.3, 1),
+        color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .code-window:hover .copy-code,
-.code-window:focus-within .copy-code { display: block; }
+.code-window:focus-within .copy-code,
+.code-window .copy-code.copied {
+    opacity: 1;
+}
+
+.code-window:hover .code-lang,
+.code-window:focus-within .code-lang {
+    opacity: 0;
+    transform: translateY(-0.15rem);
+}
+
+.code-window .copy-code svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    pointer-events: none;
+}
 
 .code-window .copy-code:hover {
-    background: rgba(255,255,255,0.12);
-    color: var(--ctp-mocha-text);
-    border-color: rgba(255,255,255,0.18);
+    background: var(--cw-copy-accent-soft);
+    border-color: var(--link);
+    color: var(--link);
 }
 
-html[data-theme="light"] .code-window .copy-code {
-    background: rgba(0,0,0,0.04);
-    color: var(--ctp-latte-subtext0);
-    border-color: rgba(0,0,0,0.08);
+.code-window .copy-code.copied {
+    background: var(--link);
+    border-color: var(--link);
+    color: var(--cw-copy-on-accent);
 }
 
-html[data-theme="light"] .code-window .copy-code:hover {
-    background: rgba(0,0,0,0.08);
-    color: var(--ctp-latte-text);
-    border-color: rgba(0,0,0,0.14);
+@media (max-width: 640px) {
+    .code-window .line-code {
+        padding-right: 4.25rem !important;
+    }
+
+    .code-window .copy-code {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+.callout .code-window {
+    margin: 1rem 0;
+}
+
+.callout .code-window:first-child {
+    margin-top: 0;
+}
+
+.callout .code-window:last-child {
+    margin-bottom: 0;
 }
