@@ -6,7 +6,7 @@
     "highlight": "bun scripts/shiki-highlight.mjs",
     "build:hugo": "hugo --gc --minify",
     "build": "bun run build:hugo && bun run highlight",
-    "build:drafts": "hugo --gc --minify --buildDrafts && bun run highlight",
+    "build:drafts": "hugo --gc --minify --buildDrafts --buildFuture && bun run highlight",
     "build:dev": "hugo --gc --minify --buildDrafts --buildFuture && bun run highlight",
     "serve": "bun scripts/serve-public.mjs",
     "dev": "bun run build:dev && bun run serve"
