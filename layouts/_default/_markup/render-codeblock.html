@@ -2,16 +2,21 @@
 {{- if eq $lang "mermaid" -}}
 <pre class="mermaid">{{ .Inner }}</pre>
 {{- else -}}
-{{- $opts := dict "linenos" "true" -}}
-<figure class="code-window" data-lang="{{ $lang }}">
-  <header class="code-titlebar" aria-hidden="true">
-    <div class="code-traffic">
-      <span class="tl tl-close"></span>
-      <span class="tl tl-min"></span>
-      <span class="tl tl-max"></span>
-    </div>
-    <div class="code-lang">{{ $lang }}</div>
-  </header>
-  {{ transform.Highlight (trim .Inner "\n") $lang $opts }}
+{{- $code := trim .Inner "\n" -}}
+{{- $filename := "" -}}
+{{- with .Attributes.filename -}}{{- $filename = . -}}{{- end -}}
+{{- with .Attributes.title -}}{{- $filename = . -}}{{- end -}}
+{{- with .Attributes.file -}}{{- $filename = . -}}{{- end -}}
+<figure class="code-window{{ if $filename }} has-code-title{{ end }}" data-lang="{{ $lang }}">
+  {{- if $filename }}
+  <figcaption class="code-titlebar">
+    <span class="code-file-icon" aria-hidden="true">[]</span>
+    <span class="code-file-name">{{ $filename }}</span>
+  </figcaption>
+  {{- end }}
+  <div class="code-frame">
+    <span class="code-lang">{{ $lang }}</span>
+    <pre class="shiki-source" tabindex="0"><code class="shiki-code language-{{ $lang }}" data-lang="{{ $lang }}">{{ $code | htmlEscape | safeHTML }}</code></pre>
+  </div>
 </figure>
 {{- end -}}

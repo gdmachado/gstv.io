@@ -91,7 +91,136 @@ html[data-theme="light"] .social-icons a:hover {
     height: 18px;
 }
 
-/* ──────────────── Share section (post bottom): labeled pill buttons ──────────────── */
+.post-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.6rem;
+}
+
+.post-meta-row .post-meta {
+    margin-top: 0;
+    min-width: 0;
+}
+
+/* ──────────────── Article share controls ──────────────── */
+.post-actionbar {
+    display: flex;
+    justify-content: flex-end;
+    flex: none;
+}
+
+.article-share-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.4rem;
+    padding: 0 0.2rem;
+    border: 0;
+    background: transparent;
+    color: var(--primary);
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        color 180ms ease,
+        transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.article-share-button svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: none;
+    transition:
+        opacity 180ms ease,
+        transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.article-share-button::after {
+    content: "";
+    position: absolute;
+    inset: -0.35rem -0.55rem;
+    border: 1px solid var(--link);
+    border-radius: 999px;
+    opacity: 0;
+    transform: scale(0.78);
+    pointer-events: none;
+}
+
+.share-check-icon {
+    position: absolute;
+    left: 0.2rem;
+    opacity: 0;
+    transform: scale(0.5) rotate(-12deg);
+}
+
+.article-share-label {
+    display: inline-block;
+    min-width: 3.55rem;
+    text-align: left;
+    transition:
+        opacity 160ms ease,
+        transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.article-share-button:hover,
+.article-share-button:focus-visible,
+.article-share-button.is-copied {
+    color: var(--link);
+    transform: translateY(-1px);
+}
+
+.article-share-button.is-copied {
+    animation: share-pop 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.article-share-button.is-copied::after {
+    animation: share-ring 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.article-share-button.is-copied .share-link-icon {
+    opacity: 0;
+    transform: scale(0.65) rotate(12deg);
+}
+
+.article-share-button.is-copied .share-check-icon {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+.article-share-button.is-copied .article-share-label {
+    animation: share-label-snap 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.article-share-button.is-error {
+    color: var(--ctp-mocha-red);
+}
+
+html[data-theme="light"] .article-share-button.is-error {
+    color: var(--ctp-latte-red);
+}
+
+@keyframes share-pop {
+    0% { transform: translateY(0) scale(1); }
+    35% { transform: translateY(-2px) scale(1.04); }
+    100% { transform: translateY(-1px) scale(1); }
+}
+
+@keyframes share-ring {
+    0% { opacity: 0; transform: scale(0.78); }
+    35% { opacity: 0.4; }
+    100% { opacity: 0; transform: scale(1.22); }
+}
+
+@keyframes share-label-snap {
+    0% { opacity: 0; transform: translateY(0.28rem); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Post bottom: labeled pill buttons */
 .share {
     display: flex;
     align-items: center;
@@ -164,43 +293,142 @@ html[data-theme="light"] .share-btn:hover {
     letter-spacing: 0.005em;
 }
 
-/* Paginav (prev / next) */
-.paginav {
+/* Edit/updated footer + prev/next navigation */
+.post-doc-footer {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 4rem 0 0.9rem;
+    padding: 0 0 1rem;
+}
+
+.post-edit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--link);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 32px;
+    text-decoration: none;
+    transition: color 180ms ease;
+}
+
+.post-edit-link svg {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.post-edit-link:hover {
+    color: var(--link-hover);
+}
+
+.post-last-updated {
+    color: var(--secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 32px;
+    text-align: right;
+}
+
+.paginav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 0;
+    padding-top: 1.5rem;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent !important;
+    line-height: normal;
 }
 
 .paginav a {
-    flex: 1 1 220px;
-    background: var(--entry);
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 11px 16px 13px;
+    overflow: hidden;
+    background: transparent;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 8px;
     color: var(--primary);
+    font-family: var(--font-body);
+    gap: 0;
+    text-decoration: none;
     transition: transform 200ms cubic-bezier(0.2,0.7,0.3,1),
+                background 180ms ease,
                 border-color 180ms ease,
                 box-shadow 200ms ease;
 }
 
 .paginav a:hover {
     border-color: var(--link);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+    background: color-mix(in srgb, var(--link) 3%, transparent);
+    transform: none;
+    box-shadow: none;
 }
 
 html[data-theme="light"] .paginav a:hover {
     box-shadow: 0 8px 18px rgba(0,0,0,0.08);
 }
 
-.paginav .title {
-    color: var(--primary);
+.paginav .desc {
+    display: block;
+    color: var(--secondary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 20px;
 }
 
-.paginav a:hover .title {
+.paginav .nav-title {
+    display: -webkit-box;
+    max-height: 40px;
+    overflow: hidden;
     color: var(--link);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    transition: color 180ms ease;
 }
 
-.paginav a:hover .next::after,
-.paginav a:hover .prev::before { color: var(--link); }
+.paginav a:hover .nav-title { color: var(--link-hover); }
+.paginav span:hover { text-decoration: none !important; }
+
+.paginav .next {
+    grid-column: 2;
+    margin-inline-start: 0;
+    text-align: right;
+}
+
+@media (max-width: 640px) {
+    .post-meta-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .post-doc-footer {
+        flex-direction: column;
+    }
+
+    .post-last-updated {
+        text-align: left;
+    }
+
+    .paginav {
+        grid-template-columns: 1fr;
+    }
+
+    .paginav .next {
+        grid-column: auto;
+    }
+}
 
 /* Now-playing: Mac/Ghostty-style terminal window */

@@ -9,13 +9,47 @@
 <meta name="twitter:card" content="summary_large_image">
 {{- end }}
 
-<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700&display=swap">
+{{- with site.Params.fonts.adobeKitId }}
+<link rel="preconnect" href="https://use.typekit.net" crossorigin>
+<link rel="preconnect" href="https://p.typekit.net" crossorigin>
+<link rel="stylesheet" href="https://use.typekit.net/{{ . }}.css">
+{{- end }}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist-mono@5/index.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.bunny.net/css?family=atkinson-hyperlegible:400,400i,700,700i&display=swap">
+{{- if or (fileExists "static/fonts/roc-grotesk/RocGrotesk-Regular.woff2") (fileExists "static/fonts/roc-grotesk/RocGrotesk-Medium.woff2") (fileExists "static/fonts/roc-grotesk/RocGrotesk-Bold.woff2") }}
+<style>
+{{- if fileExists "static/fonts/roc-grotesk/RocGrotesk-Regular.woff2" }}
+@font-face {
+  font-family: "Roc Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/roc-grotesk/RocGrotesk-Regular.woff2") format("woff2");
+}
+{{- end }}
+{{- if fileExists "static/fonts/roc-grotesk/RocGrotesk-Medium.woff2" }}
+@font-face {
+  font-family: "Roc Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/roc-grotesk/RocGrotesk-Medium.woff2") format("woff2");
+}
+{{- end }}
+{{- if fileExists "static/fonts/roc-grotesk/RocGrotesk-Bold.woff2" }}
+@font-face {
+  font-family: "Roc Grotesk";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/roc-grotesk/RocGrotesk-Bold.woff2") format("woff2");
+}
+{{- end }}
+</style>
+{{- end }}
 <script>(function(){var d=document.documentElement.dataset;["sans","mono","syntax"].forEach(function(k){var v=localStorage.getItem("pref-"+k);if(v)d[k]=v;});})();</script>
 
 {{- $posts := where site.RegularPages "Section" "posts" }}
@@ -28,6 +62,9 @@
 
 {{- $palette := resources.Get "js/search-palette.js" | minify | fingerprint }}
 <script defer src="{{ $palette.RelPermalink }}" integrity="{{ $palette.Data.Integrity }}"></script>
+
+{{- $article := resources.Get "js/article-enhancements.js" | minify | fingerprint }}
+<script defer src="{{ $article.RelPermalink }}" integrity="{{ $article.Data.Integrity }}"></script>
 
 {{- if hugo.IsProduction | or (eq site.Params.env "production") }}
     {{- if site.Params.goatCounterAnalytics }}

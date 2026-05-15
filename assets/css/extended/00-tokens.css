@@ -3,9 +3,9 @@
    Loaded first so everything else can reference these variables. */
 
 :root {
-    --font-body-cabinet:   "Cabinet Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-body-roc:       "roc-grotesk", "Roc Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --font-body-atkinson:  "Atkinson Hyperlegible", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    --font-body: var(--font-body-cabinet);
+    --font-body: var(--font-body-roc);
     --font-serif:          "Migra", ui-serif, Georgia, "Times New Roman", serif;
     --font-mono-geist:     "Geist Mono Variable", "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --font-mono-jetbrains: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -23,6 +23,7 @@
 
     --leading-tight:    1.15;
     --leading-snug:     1.3;
+    --main-width:       800px;
 
     /* Catppuccin palette: Mocha (dark) + Latte (light) */
     --ctp-mocha-crust:    #11111b;

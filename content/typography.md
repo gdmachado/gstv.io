@@ -12,13 +12,13 @@ disableShare: true
 comments: false
 ---
 
-The site uses three faces, each with one job: **Cabinet Grotesk** for body, **Migra** for display headings, **Geist Mono** for code.
+The site uses three faces, each with one job: **Roc Grotesk** for body, **Migra** for display headings, **Geist Mono** for code.
 
 ## The faces
 
 | Role | Face | Weights used |
 |---|---|---|
-| Body | [Cabinet Grotesk](https://fontshare.com/fonts/cabinet-grotesk) by Indian Type Foundry | 400, 500, 700 |
+| Body | Roc Grotesk via Adobe Fonts | 300, 400, 500, 600 |
 | Display headings | [Migra](https://pangrampangram.com/products/migra) by Pangram Pangram | 700 (Extrabold) |
 | Code | [Geist Mono](https://vercel.com/font/mono) by Vercel | 400 (variable) |
 
@@ -38,9 +38,9 @@ The site uses three faces, each with one job: **Cabinet Grotesk** for body, **Mi
 
 ## Body
 
-This is body copy in **Cabinet Grotesk** at 16 px / 1 rem with a relaxed line-height. **Bold reads as emphasis.** *Italic reads as a turn of phrase.* `Inline code reads as a token.` And [a link reads as a link](#).
+This is body copy in **Roc Grotesk** at 16 px / 1 rem with a relaxed line-height. **Bold reads as emphasis.** *Italic reads as a turn of phrase.* `Inline code reads as a token.` And [a link reads as a link](#).
 
-A second paragraph: short paragraphs make the eye breathe. Cabinet Grotesk has a tall x-height and confident grotesk shapes that hold the rhythm of body text without competing with the Migra display headings above. The pairing reads as "newspaper editorial meets engineering log."
+A second paragraph: short paragraphs make the eye breathe. Roc Grotesk has compact, workmanlike shapes that hold the rhythm of body text without competing with the Migra display headings above. The pairing reads as "documentation page meets personal notebook."
 
 ## A pull quote
 
@@ -83,15 +83,16 @@ A Major Third (1.25) modular scale, defined as CSS custom properties in `assets/
 
 ## Weights
 
-Cabinet Grotesk runs at three weights, each with a semantic role:
+Roc Grotesk runs at four weights, each with a semantic role:
 
+- **300 Light** for rare low-emphasis display or interface moments.
 - **400 Regular** for body copy.
 - **500 Medium** for nav links and form labels.
-- **700 Bold** for in-prose emphasis (`**bold**`).
+- **600 Bold** for in-prose emphasis (`**bold**`).
 
 Migra runs at one weight here, **700 Extrabold**, used only for display headings. The free Migra package also includes 200 Extralight (regular and italic) and the italic Extrabold; those cuts are loaded but currently unused, kept for future editorial flourishes.
 
-Geist Mono runs as a variable font at default weight. Only one cut is used so code reads as a single voice.
+Geist Mono runs as a variable font. Code blocks use a medium base weight, with Shiki token scopes lifting keywords, decorators, support types, entities, and constants into a semibold weight.
 
 ## A note on color
 

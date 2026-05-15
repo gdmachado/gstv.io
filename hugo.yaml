@@ -28,6 +28,11 @@ params:
   disableThemeToggle: false
   goatCounterAnalytics: gstvio
 
+  fonts:
+    # Optional Adobe Fonts web project kit ID for loading licensed fonts like Roc Grotesk.
+    # Example: https://use.typekit.net/<adobeKitId>.css
+    adobeKitId: "lwt3oku"
+
   lastfm:
     user: DrArdanuy
     apiKey: "7dc278f35697bc94a6a18b276ee93bd1" # read-only public key, safe to commit
@@ -160,15 +165,12 @@ menu:
       url: /search/
       weight: 50
 
-# Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
-# pygmentsUseClasses: true
+# Code fences render as raw escaped code in the Hugo render hook, then Shiki
+# rewrites the generated HTML at build time.
 markup:
   goldmark:
     renderer:
       unsafe: true # allow raw HTML in markdown (we author all content)
-  highlight:
-    noClasses: false # use class-based highlighting; we ship dual stylesheets via assets/css/extended/chroma-themed.css
-    style: catppuccin-mocha
 
 outputs:
   home:

@@ -3,10 +3,10 @@
     {
       key: "pref-sans",
       attr: "sans",
-      defaultValue: "cabinet",
+      defaultValue: "roc",
       label: "sans",
       options: [
-        { value: "cabinet",  name: "Cabinet Grotesk" },
+        { value: "roc",      name: "Roc Grotesk" },
         { value: "atkinson", name: "Atkinson Hyperlegible" },
       ],
     },
@@ -35,6 +35,10 @@
   function applyPref(pref, value) {
     document.documentElement.dataset[pref.attr] = value;
     localStorage.setItem(pref.key, value);
+  }
+
+  function normalizePrefValue(pref, value) {
+    return pref.options.some((opt) => opt.value === value) ? value : pref.defaultValue;
   }
 
   function buildPopover(currentValues) {
@@ -135,9 +139,12 @@
 
     const currentValues = {};
     PREFS.forEach((p) => {
-      const v = localStorage.getItem(p.key) || p.defaultValue;
+      const v = normalizePrefValue(p, localStorage.getItem(p.key) || p.defaultValue);
       currentValues[p.attr] = v;
       document.documentElement.dataset[p.attr] = v;
+      if (localStorage.getItem(p.key) !== v) {
+        localStorage.setItem(p.key, v);
+      }
     });
 
     const button = document.createElement("button");

@@ -8,6 +8,9 @@
 /assets/jsconfig.json
 hugo_stats.json
 
+# Node tooling for build-time Shiki syntax highlighting
+/node_modules/
+
 # Executable may be added to repository
 hugo.exe
 hugo.darwin
@@ -50,4 +53,3 @@ Temporary Items
 *.icloud
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,hugo
-

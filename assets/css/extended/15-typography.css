@@ -108,6 +108,64 @@ html[data-theme="light"] .profile h1 {
     color: var(--secondary);
 }
 
+.post-content h1,
+.post-content h2,
+.post-content h3,
+.post-content h4,
+.post-content h5,
+.post-content h6 {
+    position: relative;
+}
+
+.post-content h1 .anchor,
+.post-content h2 .anchor,
+.post-content h3 .anchor,
+.post-content h4 .anchor,
+.post-content h5 .anchor,
+.post-content h6 .anchor {
+    position: absolute;
+    top: 0.08em;
+    left: -1.15em;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 0.9em;
+    margin: 0;
+    color: var(--link) !important;
+    opacity: 0;
+    text-decoration: none !important;
+    transform: translateX(0.2rem);
+    transition:
+        color 180ms ease,
+        opacity 180ms ease,
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.post-content h1:hover .anchor,
+.post-content h2:hover .anchor,
+.post-content h3:hover .anchor,
+.post-content h4:hover .anchor,
+.post-content h5:hover .anchor,
+.post-content h6:hover .anchor,
+.post-content h1 .anchor:focus-visible,
+.post-content h2 .anchor:focus-visible,
+.post-content h3 .anchor:focus-visible,
+.post-content h4 .anchor:focus-visible,
+.post-content h5 .anchor:focus-visible,
+.post-content h6 .anchor:focus-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.post-content h1 .anchor:hover,
+.post-content h2 .anchor:hover,
+.post-content h3 .anchor:hover,
+.post-content h4 .anchor:hover,
+.post-content h5 .anchor:hover,
+.post-content h6 .anchor:hover {
+    color: var(--link-hover) !important;
+}
+
 /* A heading owns the block beneath it: tighten the gap to the first paragraph that follows */
 .post-content h1 + p,
 .post-content h2 + p,
