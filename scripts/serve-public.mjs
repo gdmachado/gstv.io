@@ -3,7 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const PUBLIC_DIR = path.join(ROOT, "public");
+const PUBLIC_DIR = path.resolve(ROOT, "public");
 const HOST = process.env.HOST || "127.0.0.1";
 const START_PORT = Number(process.env.PORT || 1313);
 
@@ -25,13 +25,24 @@ function contentType(filePath) {
 }
 
 function safePath(urlPath) {
-  const decoded = decodeURIComponent(urlPath.split("?")[0]);
-  const normalized = path.normalize(decoded).replace(/^(\.\.[/\\])+/, "");
-  return path.join(PUBLIC_DIR, normalized);
+  try {
+    const pathname = new URL(urlPath, "http://localhost").pathname;
+    const decoded = decodeURIComponent(pathname);
+    return path.resolve(PUBLIC_DIR, decoded.replace(/^[/\\]+/, ""));
+  } catch {
+    return null;
+  }
+}
+
+function isPublicPath(filePath) {
+  const relative = path.relative(PUBLIC_DIR, filePath);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
 async function resolveFile(urlPath) {
   let filePath = safePath(urlPath);
+  if (!filePath) return null;
+
   const stat = await fs.stat(filePath).catch(() => null);
 
   if (stat?.isDirectory()) {
@@ -61,7 +72,13 @@ const server = createServer(async (request, response) => {
   try {
     const filePath = await resolveFile(request.url || "/");
 
-    if (!filePath.startsWith(PUBLIC_DIR)) {
+    if (!filePath) {
+      response.writeHead(400, { "content-type": "text/plain; charset=utf-8" });
+      response.end("Bad request");
+      return;
+    }
+
+    if (!isPublicPath(filePath)) {
       response.writeHead(403);
       response.end("Forbidden");
       return;

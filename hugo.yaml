@@ -168,6 +168,10 @@ menu:
 # Code fences render as raw escaped code in the Hugo render hook, then Shiki
 # rewrites the generated HTML at build time.
 markup:
+  tableOfContents:
+    startLevel: 2
+    endLevel: 6
+    ordered: false
   goldmark:
     renderer:
       unsafe: true # allow raw HTML in markdown (we author all content)

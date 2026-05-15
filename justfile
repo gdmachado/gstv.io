@@ -24,5 +24,6 @@ update-theme:
 
 # Build with verbose logging so deprecations surface
 check: clean
+    bun run test:review
     bun run build:hugo -- --logLevel info
     bun run highlight

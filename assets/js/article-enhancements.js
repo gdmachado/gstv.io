@@ -1,10 +1,24 @@
 (function () {
   function initShareButtons() {
     document.querySelectorAll("[data-share-copy]").forEach((button) => {
+      const label = button.querySelector(".article-share-label");
+      const defaultLabel = label ? label.textContent : "";
+      let resetToken = 0;
+
+      function scheduleReset() {
+        const token = resetToken + 1;
+        resetToken = token;
+
+        window.setTimeout(() => {
+          if (token !== resetToken) return;
+          button.classList.remove("is-copied");
+          button.classList.remove("is-error");
+          if (label) label.textContent = defaultLabel;
+        }, 1800);
+      }
+
       button.addEventListener("click", async () => {
         const url = button.getAttribute("data-share-copy") || location.href;
-        const label = button.querySelector(".article-share-label");
-        const original = label ? label.textContent : "";
 
         try {
           if (navigator.clipboard) {
@@ -13,22 +27,18 @@
             prompt("Copy this link", url);
           }
 
+          button.classList.remove("is-error");
           button.classList.remove("is-copied");
           void button.offsetWidth;
           button.classList.add("is-copied");
           if (label) label.textContent = "Copied";
-          window.setTimeout(() => {
-            button.classList.remove("is-copied");
-            if (label) label.textContent = original;
-          }, 1800);
+          scheduleReset();
         } catch (error) {
           if (error && error.name === "AbortError") return;
+          button.classList.remove("is-copied");
           button.classList.add("is-error");
           if (label) label.textContent = "Copy failed";
-          window.setTimeout(() => {
-            button.classList.remove("is-error");
-            if (label) label.textContent = original;
-          }, 1800);
+          scheduleReset();
         }
       });
     });
