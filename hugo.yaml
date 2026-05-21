@@ -71,7 +71,7 @@ params:
   profileMode:
     enabled: true # needs to be explicitly set
     title: Hi, I’m Gus!
-    subtitle: Software Engineer based in London, UK. I build distributed data systems, lakehouse infrastructure, and near-real-time data platforms. Making data fast, correct, and boring. Currently Staff Software Engineer at [Personio](https://www.personio.com). Previously [WhatsApp](https://www.whatsapp.com)/[Meta](https://meta.com).<br><br>Away from keyboards, I’m usually playing guitar, playing games, taking photos, or making coffee more complicated than it needs to be. ☕️
+    subtitle: Software Engineer based in London, UK. I build distributed data systems, lakehouse infrastructure, and near-real-time data platforms. Making data fast, correct, and boring. Currently Staff Software Engineer at [Personio](https://www.personio.com). Previously [WhatsApp](https://www.whatsapp.com)/[Meta](https://meta.com).<br><br>Away from keyboards, I’m usually playing guitar, playing games, pointing a camera at pretty things, or making coffee more complicated than it needs to be. ☕️
     imageUrl: "/img/avatar.png"
     imageWidth: 250
     imageHeight: 250
