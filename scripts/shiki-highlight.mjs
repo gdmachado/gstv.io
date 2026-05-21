@@ -49,6 +49,16 @@ function getAttribute(attrs, name) {
   return bare ? bare[1] : "";
 }
 
+function appendClass(attrs, className) {
+  return attrs.replace(/\bclass=(["'])([^"']*)\1/i, (_match, quote, classes) => {
+    const nextClasses = classes.split(/\s+/).includes(className)
+      ? classes
+      : `${classes} ${className}`;
+
+    return `class=${quote}${nextClasses}${quote}`;
+  });
+}
+
 function normalizeLang(lang) {
   const lower = (lang || "text").toLowerCase();
   return LANGUAGE_ALIASES.get(lower) || lower;
@@ -167,7 +177,8 @@ async function processFile(filePath) {
     const code = decodeHtml(escapedCode);
     const highlighted = await highlight(code, lang);
     const cleanAttrs = attrs.replace(/\sdata-raw-code=(["']).*?\1/i, "");
-    output += `<code${cleanAttrs} data-raw-code="${encodeURIComponent(code)}">${highlighted}</code>`;
+    const highlightedAttrs = appendClass(cleanAttrs, "is-highlighted");
+    output += `<code${highlightedAttrs} data-raw-code="${encodeURIComponent(code)}">${highlighted}</code>`;
     cursor = index + fullMatch.length;
     count += 1;
   }

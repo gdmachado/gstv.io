@@ -144,6 +144,33 @@ async function checkCodeCopyFallbackKeepsLineBreaks() {
   assert.equal(copied, "first\nsecond");
 }
 
+async function checkBodyFontSizeUsesBaseToken() {
+  const source = await fs.readFile(path.join(ROOT, "assets/css/extended/15-typography.css"), "utf8");
+
+  assert.match(
+    source,
+    /body\s*\{[^}]*font-size:\s*var\(--text-base\)/s,
+    "body copy should stay pinned to the 16px base token",
+  );
+}
+
+async function checkTypographyPageUsesShikiOutput() {
+  await run("bun", ["run", "build"]);
+
+  const htmlPath = path.join(ROOT, "public/typography/index.html");
+  const html = await fs.readFile(htmlPath, "utf8");
+
+  assert.match(
+    html,
+    /<code\b[^>]*class=["'][^"']*\bshiki-code\b[^"']*\bis-highlighted\b[^"']*["'][^>]*>/,
+    "typography code blocks should use the Shiki post-processed markup",
+  );
+  assert.match(html, /class=["']line-number["']/, "typography code blocks should render line numbers");
+  assert.match(html, /class=["']line-code["']/, "typography code blocks should wrap line contents");
+  assert.match(html, /\btok-keyword\b|\btok-entity\b/, "typography code blocks should include Shiki token classes");
+  assert.doesNotMatch(html, /\bchroma-code\b/, "production typography page should not use the Hugo-server fallback");
+}
+
 async function checkPostNavigationAndTocDepth() {
   const suffix = `${process.pid}-${Date.now()}`;
   const alpha = `review-regression-alpha-${suffix}`;
@@ -239,6 +266,8 @@ async function checkMalformedUrlsReturnBadRequest() {
 const checks = [
   ["share label resets after rapid clicks", checkShareLabelResetsAfterRapidClicks],
   ["code copy fallback keeps line breaks", checkCodeCopyFallbackKeepsLineBreaks],
+  ["body font size uses base token", checkBodyFontSizeUsesBaseToken],
+  ["typography page uses Shiki output", checkTypographyPageUsesShikiOutput],
   ["post navigation and Hugo TOC depth render", checkPostNavigationAndTocDepth],
   ["malformed URLs return a bad request", checkMalformedUrlsReturnBadRequest],
 ];
