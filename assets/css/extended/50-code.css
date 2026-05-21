@@ -117,7 +117,7 @@ html[data-theme="light"] .code-window {
 .md-content .code-window pre code {
     display: block;
     margin: 0;
-    padding: 0 !important;
+    padding: 0 5.25rem 0 1.35rem !important;
     color: inherit;
     background: transparent !important;
     border-radius: 0;
@@ -126,7 +126,12 @@ html[data-theme="light"] .code-window {
     word-break: normal;
 }
 
-.code-window .shiki-code {
+.md-content .code-window pre code.is-highlighted {
+    padding: 0 !important;
+}
+
+.code-window .shiki-code,
+.code-window .code-block-code {
     min-width: max-content;
     color: var(--primary);
     font-size: 0.95rem;
@@ -173,6 +178,110 @@ html[data-theme="dark"] .code-window .shiki-code .tok {
     color: var(--shiki-dark) !important;
     font-style: var(--shiki-dark-font-style) !important;
     text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+.code-window .chroma-code {
+    --chroma-text: var(--ctp-mocha-text);
+    --chroma-keyword: var(--ctp-mocha-red);
+    --chroma-name: var(--ctp-mocha-mauve);
+    --chroma-type: var(--ctp-mocha-yellow);
+    --chroma-string: var(--ctp-mocha-green);
+    --chroma-number: var(--ctp-mocha-blue);
+    --chroma-comment: var(--ctp-mocha-overlay1);
+    --chroma-operator: var(--ctp-mocha-red);
+    --chroma-punctuation: var(--ctp-mocha-subtext0);
+
+    color: var(--chroma-text);
+}
+
+html[data-theme="light"] .code-window .chroma-code {
+    --chroma-text: var(--ctp-latte-text);
+    --chroma-keyword: var(--ctp-latte-red);
+    --chroma-name: var(--ctp-latte-mauve);
+    --chroma-type: var(--ctp-latte-yellow);
+    --chroma-string: var(--ctp-latte-green);
+    --chroma-number: var(--ctp-latte-blue);
+    --chroma-comment: var(--ctp-latte-subtext0);
+    --chroma-operator: var(--ctp-latte-red);
+    --chroma-punctuation: var(--ctp-latte-subtext1);
+}
+
+.code-window .chroma-code .k,
+.code-window .chroma-code .kc,
+.code-window .chroma-code .kd,
+.code-window .chroma-code .kn,
+.code-window .chroma-code .kp,
+.code-window .chroma-code .kr,
+.code-window .chroma-code .kt {
+    color: var(--chroma-keyword);
+    font-weight: 650;
+}
+
+.code-window .chroma-code .nc,
+.code-window .chroma-code .nd,
+.code-window .chroma-code .ne,
+.code-window .chroma-code .nf,
+.code-window .chroma-code .nt,
+.code-window .chroma-code .nx {
+    color: var(--chroma-name);
+    font-weight: 650;
+}
+
+.code-window .chroma-code .nb,
+.code-window .chroma-code .no,
+.code-window .chroma-code .nv,
+.code-window .chroma-code .vc,
+.code-window .chroma-code .vg,
+.code-window .chroma-code .vi {
+    color: var(--chroma-text);
+}
+
+.code-window .chroma-code .s,
+.code-window .chroma-code .sa,
+.code-window .chroma-code .sb,
+.code-window .chroma-code .sc,
+.code-window .chroma-code .dl,
+.code-window .chroma-code .sd,
+.code-window .chroma-code .s2,
+.code-window .chroma-code .se,
+.code-window .chroma-code .sh,
+.code-window .chroma-code .si,
+.code-window .chroma-code .sx,
+.code-window .chroma-code .sr,
+.code-window .chroma-code .s1,
+.code-window .chroma-code .ss {
+    color: var(--chroma-string);
+}
+
+.code-window .chroma-code .m,
+.code-window .chroma-code .mb,
+.code-window .chroma-code .mf,
+.code-window .chroma-code .mh,
+.code-window .chroma-code .mi,
+.code-window .chroma-code .il,
+.code-window .chroma-code .mo {
+    color: var(--chroma-number);
+}
+
+.code-window .chroma-code .c,
+.code-window .chroma-code .ch,
+.code-window .chroma-code .cm,
+.code-window .chroma-code .c1,
+.code-window .chroma-code .cs,
+.code-window .chroma-code .cp,
+.code-window .chroma-code .cpf {
+    color: var(--chroma-comment);
+    font-style: italic;
+}
+
+.code-window .chroma-code .o,
+.code-window .chroma-code .ow {
+    color: var(--chroma-operator);
+    font-weight: 650;
+}
+
+.code-window .chroma-code .p {
+    color: var(--chroma-punctuation);
 }
 
 html[data-theme="light"][data-syntax="cb"] .code-window {
@@ -242,6 +351,18 @@ html[data-syntax="cb"] .code-window .shiki-code .tok-punctuation {
     color: var(--cb-code-punctuation) !important;
 }
 
+html[data-syntax="cb"] .code-window .chroma-code {
+    --chroma-text: var(--cb-code-text);
+    --chroma-keyword: var(--cb-code-keyword);
+    --chroma-name: var(--cb-code-entity);
+    --chroma-type: var(--cb-code-support);
+    --chroma-string: var(--cb-code-string);
+    --chroma-number: var(--cb-code-constant);
+    --chroma-comment: var(--cb-code-comment);
+    --chroma-operator: var(--cb-code-operator);
+    --chroma-punctuation: var(--cb-code-punctuation);
+}
+
 .code-window .copy-code {
     position: absolute;
     top: 0.75rem;
@@ -302,6 +423,10 @@ html[data-syntax="cb"] .code-window .shiki-code .tok-punctuation {
 }
 
 @media (max-width: 640px) {
+    .md-content .code-window pre code {
+        padding-right: 4.25rem !important;
+    }
+
     .code-window .line-code {
         padding-right: 4.25rem !important;
     }

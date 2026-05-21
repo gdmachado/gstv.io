@@ -19,7 +19,7 @@ minify:
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
   title: Gus Machado
-  description: "Data-focussed Software Engineer, based in London, UK, currently a Data Engineer at Meta"
+  description: "Staff Software Engineer at Personio, based in London, UK, building distributed data systems, lakehouse infrastructure, and near-real-time data platforms."
   keywords: [Blog, Portfolio, PaperMod]
   author: Gus Machado
   images: ["/img/avatar.png"]
@@ -70,8 +70,8 @@ params:
   # profile-mode
   profileMode:
     enabled: true # needs to be explicitly set
-    title: Hi, I'm Gus!
-    subtitle: Software engineer from London, UK. Passionate about data processing systems and AI/ML. Working as a Data Engineer at [Meta](https://meta.com). Likes to unwind by playing guitar, games and pointing a camera at pretty things. Owns a borderline-illegal amount of coffee paraphernalia. ☕️
+    title: Hi, I’m Gus!
+    subtitle: Software Engineer based in London, UK. I build distributed data systems, lakehouse infrastructure, and near-real-time data platforms. Making data fast, correct, and boring. Currently Staff Software Engineer at [Personio](https://www.personio.com). Previously [WhatsApp](https://www.whatsapp.com)/[Meta](https://meta.com).<br><br>Away from keyboards, I’m usually playing guitar, playing games, taking photos, or making coffee more complicated than it needs to be. ☕️
     imageUrl: "/img/avatar.png"
     imageWidth: 250
     imageHeight: 250

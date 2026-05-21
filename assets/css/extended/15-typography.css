@@ -23,6 +23,10 @@ body, button, input, select, textarea {
     font-family: var(--font-body);
 }
 
+body {
+    font-size: var(--text-base);
+}
+
 code, kbd, pre, samp,
 .post-content code,
 .post-content pre,
