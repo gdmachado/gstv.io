@@ -16,7 +16,14 @@
   {{- end }}
   <div class="code-frame">
     <span class="code-lang">{{ $lang }}</span>
+    {{- if hugo.IsServer }}
+    {{- $opts := merge .Options (dict "lineNos" false "noClasses" false) -}}
+    {{- $highlighted := transform.HighlightCodeBlock . $opts -}}
+    {{- $rawCode := replace ($code | urlquery) "+" "%20" -}}
+    <pre class="shiki-source" tabindex="0"><code class="code-block-code chroma-code language-{{ $lang }}" data-lang="{{ $lang }}" data-raw-code="{{ $rawCode }}">{{ $highlighted.Inner }}</code></pre>
+    {{- else }}
     <pre class="shiki-source" tabindex="0"><code class="shiki-code language-{{ $lang }}" data-lang="{{ $lang }}">{{ $code | htmlEscape | safeHTML }}</code></pre>
+    {{- end }}
   </div>
 </figure>
 {{- end -}}
