@@ -1,6 +1,6 @@
 ---
 date: 2026-05-15T00:00:00+01:00
-lastmod: 2026-05-15T00:00:00+01:00
+lastmod: 2026-05-22T00:00:00+01:00
 title: "The Tiny Watermark Table of Doom"
 slug: pipeline-watermark-table-of-doom
 author: "Gus Machado"
@@ -33,123 +33,161 @@ cover:
   hidden: false
 ---
 
-Every incremental pipeline eventually wants a little state table. We've all been there. It usually starts as something painfully reasonable:
+Every Data Engineer has built one at some point. Most of us love it. You’re maintaining incremental pipelines, and at some point, it makes sense to use a simple, cute state table. Something straightforward like:
 
 ```sql
-CREATE TABLE pipeline_watermarks (
+CREATE TABLE my_pipeline_watermarks (
     pipeline_name text PRIMARY KEY,
-    watermark timestamp not null,
-    updated_at timestamp not null
+    watermark timestamp NOT NULL,
+    updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 ```
 
-There is nothing obviously wrong with this. In fact, it has a lot going for it. It is easy to explain, easy to inspect, easy to update, and easy to wrap in a transaction. You can point at it during an incident and say, “that is where the pipeline got to,” which is exactly the sort of sentence that makes engineers feel briefly in control of their lives. The transformation SQL gets simpler too. Instead of making the target table part of the state model, you put progress in one tidy place and move on.
+Nothing wrong with it, right? In fact, it has a lot going for it. It’s very easy to debug and update. You just wrap your entire logic in a transaction, and you’re done. During an incident, you can point to it and say “this is how far the pipeline has processed,” which gives data engineers a brief sense of control. The SQL transformation becomes simpler too: instead of making the target table part of the state model, you keep progress in a single, neat place.
 
-That is why this design is dangerous. Not because it is stupid, but because it is useful. Bad ideas usually have the decency to look bad early. This one works well enough to become part of the platform, part of the runbook, part of the shared mental model, and eventually part of the pile of production state everyone has to keep coherent while fixing something unrelated at 18:42 on a Friday.
+The danger is not that the design is bad. The danger is that it works so well in the happy path to sneak into the platform, the runbooks and the shared illusion we call "best practice''. Before long, it’s another piece of production state you have to keep straight while debugging an ingestion outage at 6:58 PM on a Friday, right after someone asks if you've tried restarting Airflow.
 
-The problem with a separate watermark table is not that it cannot be made transactionally correct. It can. The problem is that it creates another durable object whose lifecycle has to stay aligned with the data it describes. Every replay, backfill, delete, restore, migration, and manual repair now has one more thing to remember. The happy path gets a little cleaner. The maintenance path gets another footgun with a nice schema.
+The drawback of a separate watermark table isn’t that it can’t be made transactionally correct; of course, it can. The issue is that it introduces another durable object with its own lifecycle that must stay in sync with the data it describes. Every backfill, replay, delete, restore, migration, and manual repair adds another thing to remember. The straightforward path gets a bit easier, but the complex path - the one the on-call engineer has to deal with - now has a new footgun wrapped up in a tidy schema.
 
-## The happy path is not the interesting part
+## The dangerous middle
 
-The classic pattern looks something like this:
+Before the comment section starts installing Flink in my kitchen: this is not an argument against every metadata table that stores progress.
+
+Migration tools have schema history tables. Ingestion connectors have checkpoints. Stream processors have state backends, offsets, checkpoints, savepoints, and recovery protocols. Those systems absolutely maintain state outside the business data, and that is often the right thing.
+
+The difference is ownership.
+
+A migration metadata table is owned by the migration tool. A stream processor’s checkpoint is owned by the stream processor. A connector offset is owned by the connector. The normal human instruction is not “open the table and update the row by hand.” The tool advances the state, validates it, restores it, and gives you a supported operational model for replay and recovery.
+
+This post is about a different creature: the hand-rolled incremental transformation in a warehouse, lakehouse, or analytical database. The Airflow task. The Python job. The dbt model with custom incremental logic. The Spark microbatch. The SQL script that reads yesterday’s data, writes today’s table, and advances a cute little row called `last_processed_at`.
+
+In that world, you don’t always have a framework-owned checkpoint protocol. When the data needs fixing, the state often does too. If the state lives in a separate watermark table, “repair” usually means someone like Bob running an `UPDATE` or `DELETE` on production metadata, while everyone hopes he chose the right timestamp.
+
+That’s the tiny table of doom.
+
+## Nobody pages you for the straightforward path.
+
+The transactional pipeline looks like this:
 
 ```sql
 BEGIN;
 
-SELECT watermark
-FROM pipeline_watermarks
-WHERE pipeline_name = 'orders_enriched'
+SELECT
+    watermark
+FROM
+    my_pipeline_watermarks
+WHERE
+    pipeline_name = 'my_awesome_pipeline'
 FOR UPDATE;
 
-CREATE TEMP TABLE next_batch ON COMMIT DROP AS
+CREATE TEMP TABLE next_batch
+ON COMMIT DROP
+AS
 SELECT *
-FROM source_orders
-WHERE record_ts > (
-    SELECT watermark
-    FROM pipeline_watermarks
-    WHERE pipeline_name = 'orders_enriched'
-);
+FROM
+    my_source_table
+WHERE
+    record_ts > (
+        SELECT
+            watermark
+        FROM
+            my_pipeline_watermarks
+        WHERE
+            pipeline_name = 'my_awesome_pipeline'
+    );
 
-INSERT INTO orders_enriched (
-    order_id,
-    customer_id,
-    order_status,
-    amount,
-    source_record_ts
+INSERT INTO my_awesome_table (
+    ...
 )
 SELECT
-    order_id,
-    customer_id,
-    order_status,
-    amount,
-    record_ts
-FROM next_batch;
+    ...
+FROM
+    next_batch;
 
-UPDATE pipeline_watermarks
+UPDATE my_pipeline_watermarks
 SET
     watermark = COALESCE(
-        (SELECT max(record_ts) FROM next_batch),
+        (SELECT MAX(record_ts) FROM next_batch),
         watermark
     ),
-    updated_at = now()
-WHERE pipeline_name = 'orders_enriched';
+    updated_at = CURRENT_TIMESTAMP
+WHERE
+    pipeline_name = 'my_awesome_pipeline';
 
 COMMIT;
 ```
 
-Someone can look at that and reasonably ask what the problem is. The data write and the watermark update happen in the same transaction. If the transaction commits, both commit. If it rolls back, both roll back. Add a row lock, add a unique key, run it in Postgres, and the immediate “what if the insert succeeds but the watermark update fails?” objection mostly goes away.
+At first glance, this looks airtight. Data writes and state updates are wrapped in a single transaction. All-or-nothing, just like the textbooks promised. Throw in a row lock and a unique key, run it on Postgres or anything that can spell 'ACID,' and the classic 'what if the insert works but the watermark update fails?' nightmare fades away.
 
-That objection is also not the strongest argument against this pattern.
+But that’s not the real problem. The real problem is what happens next week.
 
-The transaction protects one execution of the pipeline. It does not protect the operational life of the dataset. It does not protect the state table from a later backfill. It does not guarantee that a restore includes both the destination table and its corresponding watermark row. It does not stop someone from deleting a bad or stale slice of data and forgetting to rewind progress. It does not encode the relationship between “these rows exist” and “this pipeline has processed up to this point” anywhere except in convention, documentation, and the collective memory of whoever happens to be on call.
+The transaction context protects a single batch of the pipeline, but it does not safeguard the table's operational life. It doesn’t protect the state table from a future backfill and doesn’t ensure that a later restore includes both the destination table and its current watermark row. More importantly, it doesn’t prevent someone from forgetting to reset the watermark state after deleting a problematic or outdated slice of data.
 
-That distinction matters. A lot of data platform bugs do not come from the normal scheduled run doing something obviously impossible. They come from the weird path: the replay, the fix-forward, the one-off rebuild, the partial correction after a bad deploy, the urgent customer-facing repair where everyone agrees this is not ideal but we need the report fixed before the next escalation call. The state table is usually fine when the system is healthy. The question is what it does when the system is being maintained by tired humans with prod access.
+Aside from documentation and the collective memory of whoever is on call, nothing captures the relationship between “these rows exist” and “this pipeline has processed data up to this point”. And that distinction matters.
 
-## You've created two durable truths
+Most bugs in data platforms don’t come from the simple routine tasks that do something impossible. They come from unexpected scenarios: replays, fixing issues, the 10B-row Debezium snapshot someone triggered during business hours (this happened to me last week), occasional full refreshes, slice reprocessing, or that tiny urgent fix for a customer where everyone agrees isn't ideal, but necessary before the next escalation.
 
-Once the watermark lives outside the destination table, the state of the pipeline exists in two places.
+The state table is happy when the system is happy. The real concern is how problematic it becomes when the system is maintained by tired individuals with production access and too much caffeine.
 
-The destination table says: these are the rows this pipeline has produced.
+## You’ve created two durable truths.
 
-The watermark table says: this is how far the pipeline believes it has processed.
+As long as the watermark exists outside the destination table, the pipeline state resides in two locations.
 
-Those two statements are meant to describe the same reality, but they are no longer the same object. They can now drift apart through completely normal operational work. Not exotic failure modes. Not Byzantine nonsense. Just the kind of maintenance every real data system eventually needs.
+The data states:
 
-Imagine a transformation bug ships on Monday and is discovered on Wednesday. The bad output only affects records since Monday morning, so the obvious repair is to delete that slice from the destination and let the pipeline rebuild it. With an external watermark, that repair is not just “delete the bad rows.” It is “delete the bad rows and update the watermark to the correct earlier value.” If the table is restored from backup, the watermark may need to be restored too. If the table is migrated, the state row has to follow. If the data is rebuilt from scratch, the watermark has to be reset. If a downstream table is rebuilt from this one, maybe its state needs to move as well.
+> These are the rows this pipeline has produced.
 
-None of this is impossible. That is not the point. The point is that you have turned one maintenance operation into a coordinated two-object operation. The correctness of the repair depends on the operator knowing that relationship exists, remembering the exact semantics, choosing the right timestamp, using the right timezone, and applying the right mutation to the right row in the right state table. This is a lot of trust to place in a tiny table whose entire charm was that it looked too simple to cause trouble.
+The watermark table states:
 
-Documentation helps, but documentation is not a transaction. Runbooks help, but runbooks are not referential integrity. Access control helps, but someone still needs permission to fix production, and that someone may be you during an incident with five people watching and one person asking whether there is “any update for leadership.”
+> This is how far our pipeline believes it has processed.
 
-This is where the separate watermark table starts to feel less like clean architecture and more like a small dependent database attached to your actual dataset. It has to be backed up, restored, migrated, secured, tested, monitored, and understood. It is not just “pipeline metadata” once the pipeline depends on it for correctness. It is production state.
+The two are meant to represent the same reality, but they are no longer the same object. Any normal operation can cause them to drift apart. Not because of outrageous failure modes, poorly designed pipelines, or the new intern messing up an UPDATE without a WHERE. Just the typical maintenance that every real data platform eventually requires.
 
-## The state table moves complexity out of the SQL and into operations
+Imagine a pipeline bug is deployed on Monday and only discovered on Wednesday. Since the table wasn’t fully reprocessed, the bad logic only affected records that arrived since Monday. The clear fix is to remove the flawed data from the destination, correct the pipeline, and allow it to naturally reprocess the data.
 
-The appeal of the side table is real. It makes the first version of the SQL cleaner. You do not need to ask the destination table anything. The job reads the current watermark, filters the source, writes the target, advances the watermark, and exits. That is a nice mental model for development, and it is often a nice mental model for scheduled execution too.
+With an external watermark table, that fix becomes more complex; it’s not just about deleting the bad slice anymore. It now involves “DELETE the bad rows, and please please remember to update the watermark to the correct previous value - make no mistakes”. If the table is restored from a backup, the watermark must be restored as well, requiring that the data and watermark backups be in sync. If the table is migrated, the state row must be migrated as well. If the data is rebuilt from scratch, the watermark has to be reset. If a downstream table is rebuilt from this one, its state might also need to be transferred.
 
-The tradeoff is that the complexity did not disappear. It moved.
+None of this is impossible. That’s not the point. The point is you’ve upgraded a simple repair into a two-object choreography. Now, correctness depends on the operator remembering the secret handshake: which timestamp, which timezone, which row, which table. All this trust, placed in a table that looked too innocent to ever betray you.
+
+Documentation helps, but documentation is not a transaction. Runbooks help, but runbooks are not referential integrity. Access control helps, but someone still needs permission to fix production, and that someone may be you during an incident with five people watching and one person asking whether there is “any update for leadership”.
+
+At this point, the watermark table stops being 'just metadata' and starts acting like a tiny shadow database glued to your real one. It needs backups, restores, migrations, permissions, tests, and the occasional exorcism. It is production state, no matter how small it looks in the ERD.
+
+## The state table moves complexity out of the SQL and into operations.
+
+The appeal of the side table is real. It makes the first SQL version cleaner. You don't need to ask the destination table anything. The job reads the current watermark, filters the source, writes the target, advances the watermark, and exits. That is a nice mental model for development, and it often works well for scheduled execution as well.
+
+The complexity didn’t vanish. It just packed its bags and moved to operations.
 
 Instead of carrying progress information in the destination table, you carry it in a separate state table. Instead of deriving state from the data that users actually query, you rely on another object to tell you what that data is supposed to represent. Instead of a rebuild naturally resetting progress, a rebuild now needs an accompanying state mutation. Instead of a delete naturally moving the observable frontier of the table backwards, a delete can leave the watermark pointing past data that no longer exists.
 
-This is the kind of tradeoff that looks small in a design document and large in production. The design document says “pipeline progress is stored in `pipeline_watermarks`.” Production says “we restored the customer-facing table to yesterday’s snapshot, but the watermark still says today, so the pipeline is happily skipping the records that would repopulate the missing data.” The design document says “manual repairs should update state.” Production says “Bob did update state, but Bob picked the event timestamp from the source table rather than the processing timestamp used by the pipeline, because both columns were called something plausible and time remains humanity’s most successful distributed systems prank.”
+This is the kind of tradeoff that looks tiny in a design doc and enormous in production. The doc says 'pipeline progress is stored in pipeline_watermarks.' Production says, 'We restored the customer table to yesterday, but the watermark still says today, so the pipeline is skipping the records that would actually fix things.' The doc says, 'manual repairs should update state.' Production says 'Bob updated state, but Bob picked the event timestamp instead of the processing timestamp, because both columns sounded reasonable and time is still the best distributed systems prank humanity ever pulled.'
 
-Bob is not the problem. Bob is inevitable. Good systems survive Bob.
+Bob is not the bug. Bob is a constant. Good systems survive Bob.
 
-The stronger design is often the one where the obvious repair is also the correct repair. If deleting bad rows should cause the pipeline to revisit that range, then the progress marker should move with those rows. If rebuilding the table should rebuild its progress, then progress should be represented in the table being rebuilt. If restoring the data should restore the pipeline’s understanding of where it got to, then that understanding should not live in a separate table someone has to remember to restore as well.
+The stronger design is often the one in which the obvious repair is also the correct one. If deleting bad rows causes the pipeline to revisit that range, the progress marker should move with those rows. If rebuilding the table should reset its progress, then progress should be rebuilt along with the table. If restoring the data should restore the pipeline’s understanding of where it got to, then that understanding should not live in a separate table that someone has to remember to restore.
 
-## Let the table describe itself
+## Let the table describe itself.
+
+{{< callout kind="warning" title="Caveat" >}}
+Small terminology note: I am using `watermark` in the warehouse-person sense: the durable progress marker a batch job uses to decide what source work it can skip next time. In stream processing, the word has a more specific meaning; that is not the thing I am arguing about here.
+
+I am going to use a timestamp as the example cursor because it is readable. Do not mistake that for advice to use event time as your checkpoint. In real systems, the right progress marker might be a Kafka offset, database LSN, source sequence number, ingestion timestamp, snapshot version, per-partition position, or a structured map of several frontiers.
+
+For now, `record_ts` is just the example-shaped cursor. The argument here is about lifecycle, not clocks.
+{{< /callout >}}
 
 The alternative is to store enough source progress information in the destination table that the next run can derive its starting point from the data itself.
 
-In the smallest, most example-friendly version, that progress marker is a source timestamp (yes, *I know*):
+In the smallest, most example-friendly version, that progress marker is a source timestamp (yes, I know):
 
 ```sql
-CREATE TABLE orders_enriched (
+CREATE TABLE my_awesome_table (
     order_id text not null,
     customer_id text not null,
     order_status text not null,
     amount numeric not null,
-    source_record_ts timestamp not null
+    source_cursor_ts timestamp not null
 );
 ```
 
@@ -158,98 +196,64 @@ The next run can derive its watermark from the target:
 ```sql
 WITH current_watermark AS (
     SELECT COALESCE(
-        MAX(source_record_ts),
+        MAX(source_cursor_ts),
         TIMESTAMP '1970-01-01'
     ) AS watermark
-    FROM orders_enriched
+    FROM my_awesome_table
 ),
 next_batch AS (
     SELECT *
-    FROM source_orders
+    FROM my_source_table
     WHERE record_ts > (
         SELECT watermark
         FROM current_watermark
     )
 )
-INSERT INTO orders_enriched (
-    order_id,
-    customer_id,
-    order_status,
-    amount,
-    source_record_ts
+INSERT INTO my_awesome_table (
+    ...
 )
 SELECT
-    order_id,
-    customer_id,
-    order_status,
-    amount,
-    record_ts
+    ...
 FROM next_batch;
 ```
 
-This is not more clever than the state table. It is arguably less elegant on first read. The target table now has a metadata column. The query has to inspect the table it writes to. You may need to think about indexes, partitioning, clustering, statistics, or whatever your engine uses to avoid turning `MAX(source_record_ts)` into a tragic full-table scan. The pattern asks more from the table design.
+This isn't more clever than the state table. It is arguably less elegant on first read. The target table now has a metadata column. The query has to inspect the table it writes to. You may need to think about indexes, partitioning, clustering, statistics, or whatever your engine uses to avoid turning MAX(source_cursor_ts) into a tragic full-table scan. The pattern asks more from the table design.
 
-But the lifecycle story is much better.
+But the life cycle story is much better.
 
-If you full-refresh the table, the watermark is rebuilt as part of the refresh. If you delete the last seven days of output, the derived watermark moves back with the remaining rows. If you restore the table, you restore both the user-visible data and the source progress represented by that data. If you inspect the destination, you can see not only the business columns but also the source frontier the table has reached. The table becomes self-describing in a way that is operationally useful, not just aesthetically pleasing.
+If you fully refresh the table, the watermark is rebuilt during the refresh. If you delete the last seven days of output, the generated watermark moves with the remaining rows back. If you restore the table, you restore both user-visible data and the source progress it represents. If you inspect the destination, you can see not only the business columns, but also the source frontier the table has reached. The table becomes self-describing in a way that is operationally useful, not just aesthetically pleasing.
 
 The important part is not the timestamp. The important part is the coupling. The progress marker is committed with the rows it describes, removed when those rows are removed, restored when those rows are restored, and rebuilt when those rows are rebuilt. You have fewer objects to keep coherent because the state moved into the object whose state you actually care about.
 
-## This is not a defence of `MAX(event_timestamp)` as a life philosophy
+{{< callout kind="info" title="Again: the timestamp is not the point." >}}
+Before the pitchforks come out: the point is that the progress marker, whatever shape it takes, is a claim about what source state is represented in the destination. If that claim describes the destination, the destination should usually be able to describe the claim itself.
+{{< /callout >}}
 
-The example above uses `MAX(record_ts)` because it is readable. It is also dangerously easy to overgeneralise.
+## Multi-source models do not rescue the tiny watermark table. They usually make it worse.
 
-In serious CDC or streaming systems, event time is often not the right notion of progress. Events can arrive late. Clocks can drift. Timestamps may not be unique. Source systems can replay old records with new meaning. Updates can be observed in an order that does not line up cleanly with business time. Kafka offsets, database LSNs, source sequence numbers, or per-partition progress markers are usually better answers when you care about replayability and correctness.
+If a table depends on orders, payments, refunds, account state, and feature flags, then one tasteful value called `last_processed_at` is probably already lying to you. The progress marker's shape should match the pipeline's shape. Sometimes that means one cursor. Sometimes it means several frontiers. Sometimes it means offsets, LSNs, or something uglier.
 
-That is a separate post, and it deserves to be a separate post, because otherwise this one turns into a seminar on time, ordering, and why distributed systems engineers all eventually develop a suspicious relationship with clocks.
+But a detached global state table does not remove that complexity. It just gives the complexity somewhere quieter to disappoint you.
 
-For this argument, the timestamp is just a stand-in for “whatever progress marker your pipeline actually trusts.” The principle is not “always use event time.” The principle is: if the progress marker describes the destination table, the destination table should usually be able to describe that progress itself.
-
-## Multi-source progress is ugly, but honest
-
-The examples so far use one source and one timestamp because that keeps the SQL readable. Real models often do not have the decency to be that simple.
-
-A materialised table might depend on several upstream inputs: orders, payments, refunds, account state, feature flags, entitlement changes, or whatever other collection of nouns the business has decided must become one “simple” reporting table. At that point, a single scalar watermark starts to look suspicious. What does it mean for the table to be processed up to `2026-05-01 10:00:00` if one input is complete to 10:00, another is complete to 09:57, and a third only emits meaningful changes when someone sacrifices a goat to the CRM?
-
-This is where the shape of the progress marker has to match the shape of the pipeline.
-
-For a multi-source model, progress may need to be represented as a small map of source frontiers rather than one value:
-
-```json
-{
-  "orders": "2026-05-01T10:00:00Z",
-  "payments": "2026-05-01T09:57:00Z",
-  "refunds": "2026-05-01T09:58:30Z"
-}
-```
-
-In a more serious CDC system, those values might not be timestamps at all. They might be offsets, sequence numbers, LSNs, or per-partition positions. That is a different post. The important point here is that the progress marker should describe the actual inputs that produced the output, not the version of the pipeline we wish we had.
-
-This can get ugly. You may need metadata columns. You may need a batch ledger. You may need to store structured progress information. You may need to define what “complete” means when one source advances and another does not. You may need to make peace with the fact that the correct answer is not always a single tasteful timestamp called `watermark`.
-
-But ugly and explicit is better than tidy and false.
-
-A separate state table can hide this complexity for a while. It can give you one neat row per pipeline and a friendly-looking value called `last_processed_at`. The trouble is that the model still has multiple inputs whether the state table admits it or not. If the destination depends on several upstream frontiers, the progress state should make that visible somewhere close to the data product. Otherwise you have not simplified the system. You have just given the complexity somewhere quieter to disappoint you from.
-
-## Empty batches do not get you off the hook
+## Empty batches do not get you off the hook.
 
 There is one awkward case people correctly bring up with inline progress: what happens when the source advances but the destination emits no rows?
 
-Suppose the pipeline reads a batch of source records and filters all of them out. Maybe they are no-op updates. Maybe they are soft deletes. Maybe they refer to entities outside the scope of this model. Maybe they are valid source records that simply do not produce business output in this particular table. The source has moved forward, but the destination has no new rows to carry that progress.
+Suppose the pipeline reads a batch of source records and filters them all out. Maybe they are no-op updates. Maybe they are soft deletes. Maybe they refer to entities outside the scope of this model. Maybe they are valid source records that simply do not produce business output in this particular table. The source has moved forward, but the destination has no new rows to carry that progress.
 
 That is a real problem. It is just not a knockout argument for a detached watermark table.
 
-What it actually tells you is that “store the watermark on every emitted row” is the simplest version of the pattern, not the whole pattern. The broader rule is that progress should move with the data product’s lifecycle. If the data is rebuilt, progress should be rebuilt. If the data is restored, progress should be restored. If part of the data is deleted and replayed, progress should move in a way that is obvious from the same operational procedure.
+What it actually tells you is that “store the watermark on every emitted row” is the simplest version of the pattern, not the whole pattern. The broader rule is that progress should move with the data product’s lifecycle. If the data is rebuilt, progress should be rebuilt. If the data is restored, progress should be restored. If part of the data is deleted and then replayed, progress should be obvious from the same operational procedure.
 
 There are a few ways to do that, none of them free.
 
 For append-only tables where empty batches are rare and bounded, you may simply accept repeated reads over the empty gap. The next run sees the same source records, filters them again, and eventually advances once a later batch produces output. That is not beautiful, but if the cost is tiny and the behaviour is understood, it may be perfectly fine. Not every edge case needs a distributed systems dissertation taped to it.
 
-For upsert-shaped tables, you can sometimes carry progress by updating or re-emitting a real row touched by the pipeline. For example, if the pipeline maintains one row per entity, a batch that observes source progress but produces no material business change may still be able to update pipeline metadata on an existing entity row. Another variation is to replay or upsert the last batch, or a representative record from it, with an advanced progress marker so the destination can carry the frontier across the empty gap.
+For upsert-shaped tables, you can sometimes carry progress by updating or re-emitting a real row touched by the pipeline. For example, if the pipeline maintains one row per entity, a batch that observes source progress but produces no material business change may still update pipeline metadata for an existing entity row. Another variation is to replay or upsert the last batch, or a representative record from it, with an advanced progress marker so the destination can carry the frontier across the empty gap.
 
 That keeps the progress state inside the destination table without inventing a fake domain object. It does, however, require care. You need to understand write amplification, update semantics, audit columns, downstream change capture, cache invalidation, and whether “this row was updated” means something business-facing elsewhere. Metadata-only updates are still updates. They do not become harmless because we gave the column a sensible name and asked nicely.
 
-For more complex cases, you may need an explicit progress carrier: a small batch ledger, a per-table progress relation, or some other metadata object that belongs to the data product. At that point, yes, you have introduced state outside the business rows. But that is different from casually dropping everything into one global `pipeline_watermarks` table and hoping runbooks will save you. The progress object should be scoped, owned, migrated, restored, and rebuilt with the table it describes. It should be treated as part of the data product, not as an invisible clipboard floating somewhere near the scheduler.
+For more complex cases, you may need an explicit progress carrier: a small batch ledger, a per-table progress relation, or some other metadata object that belongs to the data product. At that point, yes, you have introduced state outside the business rows. But that is different from casually dropping everything into one global pipeline_watermarks table and hoping runbooks will save you. The progress object should be scoped, owned, migrated, restored, and rebuilt with the table it describes. It should be treated as part of the data product, not as an invisible clipboard floating somewhere near the scheduler.
 
 What you probably do not want is a fake sentinel row in the business table:
 
@@ -257,48 +261,60 @@ What you probably do not want is a fake sentinel row in the business table:
 customer_id = '__watermark__'
 ```
 
-That starts as a clever workaround and ends as folklore. Every downstream query needs to remember to exclude the fake row. Every new engineer has to learn that one row in the table is not really a row. Every invariant grows an exception. Eventually someone forgets, and your analytics now include a haunted customer whose only purchase was pipeline state. Sentinel rows are side tables wearing a fake moustache.
+That starts as a clever workaround and ends as folklore. Every downstream query needs to remember to exclude the fake row. Every new engineer has to learn that one row in the table is not really a row. Every invariant grows an exception. Eventually, someone forgets, and your analytics now include a haunted customer whose only purchase was pipeline state. Sentinel rows are side tables wearing a fake moustache.
 
 The empty-batch problem is useful because it forces the real design question: what object carries progress when no business output is produced? There is no universal answer. The wrong answer is pretending the problem does not exist. The slightly less wrong answer is creating a tiny detached state table by default. The better answer is to make the carrier explicit and keep it tied to the lifecycle of the data it describes.
 
-## `MAX(...)` needs to be cheap
+## `MAX(...)` needs to be cheap.
 
 There is also a performance version of this problem. Deriving the watermark from the target only works if deriving it is cheap enough to do routinely.
 
 This query looks innocent:
 
 ```sql
-SELECT MAX(source_record_ts)
-FROM orders_enriched;
+SELECT MAX(source_cursor_ts)
+FROM my_awesome_table;
 ```
 
-On the wrong table, in the wrong engine, with the wrong layout, it is not innocent at all. It is a full scan in a tiny hat. If every incremental run has to read a large destination table just to decide where to start, the system will eventually acquire a workaround. That workaround will probably be another state table. It may even be called something like `pipeline_watermarks_v2`, which is how you know the ghosts have won.
+On the wrong table, in the wrong engine, with the wrong layout, it is not innocent at all. It is a full scan in a tiny hat. If every incremental run has to read a large destination table just to decide where to start, the system will eventually acquire a workaround. That workaround will probably be another state table. It may even be called something like pipeline_watermarks_v2, which is how you know the ghosts have won.
 
 So the target table has to be designed for the responsibility you are giving it. Maybe that means an index. Maybe it means partitioning by the progress column. Maybe it means clustering or sorting. Maybe it means relying on table metadata, file statistics, zone maps, manifests, min/max stats, or whatever your storage engine can use to avoid touching data it does not need. The exact mechanism depends heavily on the system. Postgres, ClickHouse, DuckDB, BigQuery, Spark, StarRocks, and Iceberg-backed lakehouses all have different answers here.
 
+{{< callout kind="tip" title="Performance note" >}}
+To keep inline progress patterns from becoming performance traps, design for the read you are asking the table to perform.
+
+Depending on the engine, that may mean an index, sort key, clustering key, partitioning strategy, projection, materialised view, table metadata query, file-level statistics, zone maps, or manifest inspection. Postgres, ClickHouse, BigQuery, StarRocks, DuckDB, Spark, Delta Lake, and Iceberg-backed lakehouses all have different answers here.
+
+Do not assume `MAX(progress_marker)` is cheap because it looks small in SQL. Check the actual query plan and test it at production scale. If deriving the frontier is expensive, someone will eventually “optimise” it by creating a side table, and then the ghosts are back.
+{{< /callout >}}
+
 The general rule is boring but important: if the table is going to describe its own progress, make that description cheap to read. Correctness patterns that are too expensive do not survive contact with production. They get “optimised” during an incident, and those optimisations tend to reintroduce the very state drift you were trying to avoid.
 
-## When the tiny table is the right tool
+## When this post does not apply
 
-A separate watermark table is not evil. Sometimes it is the honest design.
+A separate progress table is not necessarily evil. Framework state is different.
 
-If the pipeline coordinates multiple outputs, external state may be necessary. If it needs to advance progress even when no destination rows are produced and there is no sensible in-table carrier, an external ledger may be the cleanest option. If you are tracking connector checkpoints, workflow attempts, retry history, operational metadata, or state across systems that do not share a useful write boundary, keeping that state outside the destination table can be perfectly reasonable.
+Pure ingestion systems usually require connector-owned checkpoints. Stream processors need checked operator state, offsets, savepoints and recovery metadata. Migration systems require schema history tables. If a framework owns this state and provides the operational model around replay, restore and recovery, this post is not an objection to that.
 
-The point is not “never use a state table.” That is too neat, and neat rules tend to become wrong as soon as production finds an interesting shape.
+That is very different from a handwritten transformation that casually stores `last_processed_at` in a global table and calls it done.
 
-The point is that a state table is not free. It is not “just metadata” if the correctness of the pipeline depends on it. It is a production table with schema, permissions, migrations, backups, restores, tests, dashboards, ownership, and incident semantics. It needs to move with the data it describes, or the system needs a very explicit answer for what happens when it does not.
+In the world this post is about, the important question is not “can a separate watermark table be made correct?” Of course it can. The important question is “who repairs it when the data moves?”
 
-If you choose a separate watermark table, choose it deliberately. Document how to rewind it. Document how it interacts with partial rebuilds. Document what should happen during restores. Document whether the watermark is event time, processing time, source sequence, or something else. Document what to do when it disagrees with the destination table. Most importantly, make sure the operational procedure is something a tired engineer can follow correctly while production is on fire.
+If the answer is “Bob updates the row during an incident”, then the row is not harmless metadata. It is production state with a pager attached.
 
 ## The rule
 
 A watermark is not just a variable. It is a claim about what data exists.
 
-When that claim lives outside the data, you have created a second durable truth. That may be necessary, but it should not be accidental. Every second truth needs lifecycle management, and lifecycle management is where a lot of data systems quietly become unreliable.
+In framework-owned systems, that claim may live in checkpoints, offsets, savepoints, metadata tables, or state backends. That is fine. The framework owns the lifecycle.
 
-For many incremental analytical tables, the destination can carry enough information to answer the question the next run needs to ask: where did this table get to? When that works, prefer it. Put the progress marker with the rows it describes. Let rebuilds rebuild state. Let deletes move progress backwards naturally. Let restores restore the data and its progress together.
+In hand-rolled analytical transformations, the framework is often missing. The lifecycle is you, your runbook, and Bob with production access. My rule for that world is simple: do not put the progress claim in a detached state table by default.
 
-Make the table self-describing.
+Make the destination describe its own progress, or make the progress carrier part of the data product. If you genuinely need a separate progress object, stop treating it like a cute helper table. You are designing a checkpointing surface, and it needs ownership, repair semantics, restore semantics, tooling, and tests.
+
+For many incremental warehouse and lakehouse transformations, the destination can carry enough information to answer the question the next run needs to ask: where did this table get to? When that works, prefer it. Put the progress marker with the rows it describes, or use a progress carrier that is explicitly owned by the data product rather than floating near the scheduler.
+
+Let rebuilds rebuild the state. Let restores restore the state. Let deletes and replays have an obvious operational meaning.
 
 Make the boring repair the correct repair.
 
