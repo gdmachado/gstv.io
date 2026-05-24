@@ -66,6 +66,11 @@
 {{- $article := resources.Get "js/article-enhancements.js" | minify | fingerprint }}
 <script defer src="{{ $article.RelPermalink }}" integrity="{{ $article.Data.Integrity }}"></script>
 
+{{- if eq .Section "photos" }}
+{{- $photo := resources.Get "js/photo-enhancements.js" | minify | fingerprint }}
+<script defer src="{{ $photo.RelPermalink }}" integrity="{{ $photo.Data.Integrity }}"></script>
+{{- end }}
+
 {{- if hugo.IsProduction | or (eq site.Params.env "production") }}
     {{- if site.Params.goatCounterAnalytics }}
         {{- template "partials/goatcounteranalytics.html" . }}

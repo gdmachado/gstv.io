@@ -1,4 +1,6 @@
 (function () {
+  const SHARE_RESET_MS = 1800;
+
   function initShareButtons() {
     document.querySelectorAll("[data-share-copy]").forEach((button) => {
       const label = button.querySelector(".article-share-label");
@@ -14,7 +16,7 @@
           button.classList.remove("is-copied");
           button.classList.remove("is-error");
           if (label) label.textContent = defaultLabel;
-        }, 1800);
+        }, SHARE_RESET_MS);
       }
 
       button.addEventListener("click", async () => {

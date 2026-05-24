@@ -10,24 +10,33 @@
   {{- end }}
 </header>
 
-<section class="photos-grid">
-  {{- range .Pages.ByPublishDate.Reverse }}
-    {{- $cover := (.Resources.ByType "image").GetMatch "cover.*" }}
-    {{- if not $cover }}{{ $cover = (.Resources.ByType "image").GetMatch "*" }}{{ end }}
-    {{- if $cover }}
-      {{- $thumb := $cover.Resize "800x webp q82" }}
-      {{- $small := $cover.Resize "400x webp q70" }}
-      <a class="photo-card" href="{{ .RelPermalink }}" aria-label="{{ .Title }}">
-        <img
-          src="{{ $thumb.RelPermalink }}"
-          srcset="{{ $small.RelPermalink }} 400w, {{ $thumb.RelPermalink }} 800w"
-          sizes="(min-width: 800px) 400px, 100vw"
-          width="{{ $thumb.Width }}" height="{{ $thumb.Height }}"
-          alt="{{ .Title }}" loading="lazy" decoding="async">
-        <span class="photo-card-title">{{ .Title }}</span>
-      </a>
-    {{- end }}
+{{- $pageSize := int (site.Params.photos.pageSize | default 6) }}
+{{- $paginator := .Paginate .Pages.ByPublishDate.Reverse $pageSize }}
+{{- $pageOffset := mul (sub $paginator.PageNumber 1) $pageSize }}
+
+<section class="photo-lab photo-archive">
+<div class="photo-salon-wall" data-photo-grid aria-label="Photo archive">
+  {{- range $index, $photo := $paginator.Pages }}
+    {{- partial "photo_salon_item.html" (dict "photo" $photo "index" (add $pageOffset $index) "class" "photo-salon-frame" "attrs" " data-photo-item" "metaMode" "polaroid") }}
   {{- end }}
+</div>
 </section>
+
+{{- if gt $paginator.TotalPages 1 }}
+<section class="photo-salon-skeletons photos-grid-skeletons" data-photo-skeletons hidden aria-hidden="true">
+  <span class="photo-skeleton-card is-landscape"></span>
+  <span class="photo-skeleton-card is-portrait"></span>
+  <span class="photo-skeleton-card is-portrait"></span>
+</section>
+
+<nav class="photos-pagination" data-photo-pagination data-photo-current="{{ $paginator.PageNumber }}" data-photo-total="{{ $paginator.TotalPages }}" aria-label="Photo pages" aria-busy="false">
+  <span class="photos-pagination-status" data-photo-status>page {{ $paginator.PageNumber }} / {{ $paginator.TotalPages }}</span>
+  {{- with $paginator.Next }}
+  <a class="photos-pagination-next" data-photo-next href="{{ .URL }}">load page {{ .PageNumber }}</a>
+  {{- end }}
+</nav>
+
+<div class="photos-scroll-sentinel" data-photo-sentinel aria-hidden="true"></div>
+{{- end }}
 
 {{- end }}

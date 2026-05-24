@@ -1,0 +1,48 @@
+{{- $page := .page | default . -}}
+{{- $mode := .mode | default "single" -}}
+{{- $credits := $page.Params.credits | default slice -}}
+
+{{- if gt (len $credits) 0 -}}
+  {{- if eq $mode "polaroid" -}}
+    <div class="photo-credits photo-credits-polaroid" aria-label="Photo credits">
+      {{- range $credit := $credits }}
+        {{- $role := $credit.role | default "credit" -}}
+        {{- $label := or $credit.handle $credit.name -}}
+        {{- if $label }}
+          <span class="photo-credit">
+            <span class="photo-credit-role">{{ $role }}</span>
+            {{- with $credit.url }}
+              <a href="{{ . }}" rel="noopener noreferrer" target="_blank">{{ $label }}</a>
+            {{- else }}
+              <span class="photo-credit-name">{{ $label }}</span>
+            {{- end }}
+          </span>
+        {{- end }}
+      {{- end }}
+    </div>
+  {{- else -}}
+    <div class="photo-meta-object photo-credits-object photo-credits-object-{{ $mode }}">
+      <div class="photo-meta-brace">photo.credits [</div>
+      <ol class="photo-credits-list">
+        {{- range $index, $credit := $credits }}
+          {{- $role := $credit.role | default "credit" -}}
+          {{- $label := or $credit.handle $credit.name -}}
+          {{- if $label }}
+            <li>
+              <span class="photo-meta-brace">{</span>
+              <span class="photo-credit-key">role</span>: "{{ $role }}",
+              <span class="photo-credit-key">handle</span>:
+              {{- with $credit.url }}
+                <a href="{{ . }}" rel="noopener noreferrer" target="_blank">"{{ $label }}"</a>
+              {{- else }}
+                <span>"{{ $label }}"</span>
+              {{- end }}
+              <span class="photo-meta-brace">}</span>{{ if lt (add $index 1) (len $credits) }},{{ end }}
+            </li>
+          {{- end }}
+        {{- end }}
+      </ol>
+      <div class="photo-meta-brace">]</div>
+    </div>
+  {{- end -}}
+{{- end -}}
