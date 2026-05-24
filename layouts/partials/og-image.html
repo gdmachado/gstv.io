@@ -1,14 +1,54 @@
 {{- $base := resources.Get "images/og-base.png" -}}
 {{- $font := resources.Get "fonts/Satoshi-Bold.ttf" -}}
 
-{{- /* Wrap title to ~22 chars/line */ -}}
+{{- $canvas := $base -}}
+{{- $coverPath := .Param "cover.image" -}}
+{{- $cover := false -}}
+{{- $artSlotX := 455 -}}
+{{- $artSlotY := 80 -}}
+{{- $artSlotWidth := 700 -}}
+{{- $artSlotHeight := 394 -}}
+{{- $artWidth := 684 -}}
+{{- $artHeight := 385 -}}
+{{- with $coverPath -}}
+  {{- $cover = $.Resources.GetMatch . -}}
+  {{- if not $cover -}}
+    {{- $cover = $.Resources.GetMatch (path.Base .) -}}
+  {{- end -}}
+{{- end -}}
+{{- with $cover -}}
+  {{- $echo := .Fill "1200x630 Center" -}}
+  {{- $echo = $echo.Filter (images.GaussianBlur 24) (images.Brightness 10) (images.Saturation -55) (images.Opacity 0.16) -}}
+  {{- $art := .Fit (printf "%dx%d" $artWidth $artHeight) -}}
+  {{- $artX := add $artSlotX (div (sub $artSlotWidth $art.Width) 2) -}}
+  {{- $artY := add $artSlotY (div (sub $artSlotHeight $art.Height) 2) -}}
+  {{- $frame := $art.Filter (images.Padding 3 "#45475a") -}}
+  {{- $shadow := $frame.Filter (images.GaussianBlur 12) (images.Brightness -90) (images.Opacity 0.55) -}}
+  {{- $glow := $art.Filter (images.GaussianBlur 18) (images.Saturation 45) (images.Opacity 0.24) -}}
+  {{- $canvas = $canvas.Filter
+      (images.Overlay $echo 0 0)
+      (images.Overlay $shadow (add (sub $artX 3) 9) (add (sub $artY 3) 13))
+      (images.Overlay $glow $artX $artY)
+      (images.Overlay $frame (sub $artX 3) (sub $artY 3))
+      (images.Overlay $art $artX $artY)
+  -}}
+{{- end -}}
+
 {{- $title := .Title | default site.Title -}}
+{{- $titleMax := 14 -}}
+{{- $titleSize := 55 -}}
+{{- $titleSpacing := 8 -}}
+{{- if gt (len $title) 46 -}}
+  {{- $titleMax = 22 -}}
+  {{- $titleSize = 42 -}}
+  {{- $titleSpacing = 7 -}}
+{{- end -}}
 {{- $words := split $title " " -}}
 {{- $lines := slice -}}
 {{- $current := "" -}}
 {{- range $words -}}
   {{- $candidate := cond (eq $current "") . (printf "%s %s" $current .) -}}
-  {{- if gt (len $candidate) 22 -}}
+  {{- if and (ne $current "") (gt (len $candidate) $titleMax) -}}
     {{- $lines = $lines | append $current -}}
     {{- $current = . -}}
   {{- else -}}
@@ -16,11 +56,73 @@
   {{- end -}}
 {{- end -}}
 {{- if ne $current "" -}}{{- $lines = $lines | append $current -}}{{- end -}}
-{{- $wrapped := delimit $lines "\n" -}}
+{{- $wrapped := delimit (first 4 $lines) "\n" -}}
 
-{{- $stamped := $base.Filter
-    (images.Text $wrapped (dict "color" "#cdd6f4" "size" 72 "linespacing" 16 "x" 80 "y" 90 "font" $font))
-    (images.Text "gstv.io" (dict "color" "#7f849c" "size" 28 "x" 80 "y" 540 "font" $font))
+{{- $description := .Description | default site.Params.description | plainify -}}
+{{- $descriptionWords := split $description " " -}}
+{{- $descriptionLines := slice -}}
+{{- $descriptionCurrent := "" -}}
+{{- range $descriptionWords -}}
+  {{- $candidate := cond (eq $descriptionCurrent "") . (printf "%s %s" $descriptionCurrent .) -}}
+  {{- if and (ne $descriptionCurrent "") (gt (len $candidate) 31) -}}
+    {{- $descriptionLines = $descriptionLines | append $descriptionCurrent -}}
+    {{- $descriptionCurrent = . -}}
+  {{- else -}}
+    {{- $descriptionCurrent = $candidate -}}
+  {{- end -}}
+{{- end -}}
+{{- if ne $descriptionCurrent "" -}}{{- $descriptionLines = $descriptionLines | append $descriptionCurrent -}}{{- end -}}
+{{- $descriptionWrapped := delimit (first 4 $descriptionLines) "\n" -}}
+
+{{- $label := "POST" -}}
+{{- with .Params.ogEyebrow -}}
+  {{- $label = (. | plainify | upper) -}}
+{{- else -}}
+  {{- with .Params.tags -}}
+    {{- $label = (delimit (first 2 .) " / " | replaceRE "-" " " | upper) -}}
+  {{- end -}}
+{{- end -}}
+{{- $meta := "gstv.io" -}}
+{{- if not .Date.IsZero -}}
+  {{- $meta = printf "gstv.io / %s" (.Date.Format "Jan 2, 2006") -}}
+{{- end -}}
+{{- $caption := .Params.ogCaption | default (.Param "cover.caption") | default "" | plainify -}}
+{{- $captionWrapped := "" -}}
+{{- with $caption -}}
+  {{- $captionWords := split . " " -}}
+  {{- $captionLines := slice -}}
+  {{- $captionCurrent := "" -}}
+  {{- range $captionWords -}}
+    {{- $candidate := cond (eq $captionCurrent "") . (printf "%s %s" $captionCurrent .) -}}
+    {{- if and (ne $captionCurrent "") (gt (len $candidate) 52) -}}
+      {{- $captionLines = $captionLines | append $captionCurrent -}}
+      {{- $captionCurrent = . -}}
+    {{- else -}}
+      {{- $captionCurrent = $candidate -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if ne $captionCurrent "" -}}{{- $captionLines = $captionLines | append $captionCurrent -}}{{- end -}}
+  {{- $captionWrapped = delimit (first 2 $captionLines) "\n" -}}
+{{- end -}}
+
+{{- $stamped := $canvas.Filter
+    (images.Text $label (dict "color" "#f38ba8" "size" 21 "x" 74 "y" 70 "font" $font))
+    (images.Text $wrapped (dict "color" "#f9e2af" "size" $titleSize "linespacing" $titleSpacing "x" 72 "y" 122 "font" $font))
+    (images.Text $descriptionWrapped (dict "color" "#cdd6f4" "size" 25 "linespacing" 7 "x" 74 "y" 382 "font" $font))
+    (images.Text $meta (dict "color" "#bac2de" "size" 24 "x" 74 "y" 548 "font" $font))
 -}}
-{{- $out := resources.Copy (printf "og/%s.png" (.File.UniqueID | default "default")) $stamped -}}
+{{- with $captionWrapped -}}
+  {{- $stamped = $stamped.Filter (images.Text . (dict "color" "#9399b2" "size" 22 "linespacing" 6 "x" 455 "y" 518 "font" $font)) -}}
+{{- end -}}
+{{- $slug := .Params.slug -}}
+{{- if not $slug -}}
+  {{- if and .File (ne .File.BaseFileName "index") -}}
+    {{- $slug = .File.BaseFileName -}}
+  {{- else if .File -}}
+    {{- $slug = .File.UniqueID -}}
+  {{- else -}}
+    {{- $slug = .Title | urlize -}}
+  {{- end -}}
+{{- end -}}
+{{- $out := resources.Copy (printf "og/%s.png" $slug) $stamped -}}
 {{- $out.Permalink -}}

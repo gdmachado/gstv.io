@@ -9,14 +9,14 @@
 
   <div class="photo-detail-shell">
     <div class="photo-stack">
-      {{- range (.Resources.ByType "image") }}
-        {{- if (or (eq .Name "cover") (not (hasPrefix .Name "cover."))) }}
+      {{- $photo := partial "photo_source.html" . -}}
+      {{- with $photo }}
           {{- $fullWidth := int (math.Min 1800 .Width) }}
-          {{- $full := .Resize (printf "%dx webp q88" $fullWidth) }}
+          {{- $full := .Resize (printf "%dx webp q95" $fullWidth) }}
           {{- $halfWidth := int (math.Min 800 .Width) }}
-          {{- $half := .Resize (printf "%dx webp q80" $halfWidth) }}
-          {{- $viewerWidth := int (math.Min 2600 .Width) }}
-          {{- $viewer := .Resize (printf "%dx webp q90" $viewerWidth) }}
+          {{- $half := .Resize (printf "%dx webp q90" $halfWidth) }}
+          {{- $viewerWidth := int (math.Min 3200 .Width) }}
+          {{- $viewer := .Resize (printf "%dx webp q95" $viewerWidth) }}
           <figure class="photo-detail-figure{{ if gt .Height .Width }} is-portrait{{ else }} is-landscape{{ end }}">
             <button
               type="button"
@@ -34,7 +34,6 @@
                 alt="{{ $.Title }}" loading="lazy" decoding="async">
             </button>
           </figure>
-        {{- end }}
       {{- end }}
     </div>
 

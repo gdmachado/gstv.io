@@ -1,6 +1,6 @@
 # Authoring Posts
 
-This is the quick reference for writing posts with the custom article chrome in this site: right-hand table of contents, callouts, Shiki code blocks, copy buttons, share button, and the post footer.
+This is the quick reference for writing posts with the custom article chrome in this site: right-hand table of contents, callouts, Shiki code blocks, modern images, generated OG cards, copy buttons, share button, and the post footer.
 
 ## Local Workflow
 
@@ -34,7 +34,13 @@ Run the local post-processed preview server:
 bun run dev
 ```
 
-Hugo still builds the site. Bun is only used for JavaScript dependencies and for the Shiki post-processing step that rewrites Hugo's generated code blocks in `public/`.
+Regenerate AVIF and WebP sidecars after adding or replacing post images:
+
+```sh
+just images
+```
+
+Hugo still builds the site. Bun is used for JavaScript dependencies, Shiki post-processing, the local static preview server, and the image sidecar script.
 
 ## Photo Workflow
 
@@ -47,7 +53,8 @@ just photos-import .context/photo-imports
 The import command:
 
 - creates `content/photos/ph-<hash>/` so the published URL does not expose the original filename
-- writes the optimized site image to `photo.jpg` with a 2400px long edge and JPEG quality 95
+- writes the optimized site image to `photo.jpg` with a 3200px long edge and JPEG quality 95
+- strips stale embedded metadata while preserving the ICC profile, then stamps `photo.jpg` with a standardized copyright for Gus Machado (gstv.io)
 - creates `index.md` when one does not already exist
 - extracts camera, lens, focal length, aperture, shutter speed, ISO, and city/country location when Lightroom or macOS exposes those fields
 - avoids publishing exact GPS coordinates
@@ -75,6 +82,12 @@ credits:
 ```
 
 For RAW files, do the Lightroom Classic preparation step first: import the ARW/NEF files, apply conservative baseline adjustments, export JPEG previews for review, then run `just photos-import` on the approved JPEG export folder.
+
+Run this after manually replacing any canonical photo source:
+
+```sh
+just photos-stamp-metadata
+```
 
 ## Front Matter
 
@@ -108,6 +121,52 @@ Notes:
 - `disableShare: false` shows the top-right copy-link share button in the metadata row.
 - `ShowPostNavLinks: true` shows previous and next cards at the bottom of the post.
 - The "Suggest Changes" link comes from `params.editPost` in `hugo.yaml`; per-post front matter is only needed if you want to override or disable it.
+
+## Covers, Captions, And OG Cards
+
+Use a page bundle with local cover art when a post needs a rich share preview. A `1600x900` source is enough for the site cover and the generated `1200x630` OG card. Keep covers at `16:9` unless the art needs a different crop.
+
+The `cover` block is the main source of truth:
+
+```yaml
+cover:
+  image: "images/cover.png"
+  alt: "Specific alt text for the cover image."
+  caption: "Short caption used under the cover and on the OG card."
+  relative: true
+  hidden: false
+```
+
+Notes:
+
+- `cover.caption` renders under the cover on the post page.
+- The generated OG card uses `cover.caption` as its caption line.
+- If a Markdown image or `figure` shortcode points at the same cover image and does not set a caption, it reuses `cover.caption`.
+- `description` becomes the metadata description and the left-side OG summary.
+- `ogEyebrow` overrides the small all-caps OG label. Without it, the label comes from the first two tags.
+- `ogCaption` overrides the OG caption only. Use it when the cover caption is too long for a share image.
+
+Generated OG images are written to `/og/<slug>.png` at `1200x630`. Rebuild the site and open that file in `public/og/` when you want to inspect the share preview.
+
+## Images
+
+For local post images, commit the original source plus generated AVIF and WebP files:
+
+```text
+content/posts/my-post/images/cover.png
+content/posts/my-post/images/cover.avif
+content/posts/my-post/images/cover.webp
+```
+
+Run this after adding or replacing post images:
+
+```sh
+just images
+```
+
+Covers, regular Markdown images, and the `figure` shortcode render as `<picture>` with AVIF first, WebP second, and the original image as the fallback. Remote images render as normal `<img>` tags. The image sidecar script skips `content/photos/`, because the photo gallery keeps one large canonical source per photo and lets Hugo create page-specific renditions.
+
+The sidecar script defaults to high-quality post art settings. Override `IMAGE_AVIF_QUALITY`, `IMAGE_AVIF_SPEED`, or `IMAGE_WEBP_QUALITY` only when regenerating sidecars for a post that needs a different quality or speed tradeoff.
 
 ## Table Of Contents
 

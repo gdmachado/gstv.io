@@ -1,0 +1,24 @@
+{{- $destination := .Destination -}}
+{{- $isRemote := or (strings.HasPrefix $destination "http://") (strings.HasPrefix $destination "https://") -}}
+{{- $coverImage := .Page.Param "cover.image" -}}
+{{- $coverCaption := .Page.Param "cover.caption" -}}
+{{- $caption := "" -}}
+{{- if and $coverImage $coverCaption (or (eq $destination $coverImage) (eq (path.Base $destination) (path.Base $coverImage))) -}}
+  {{- $caption = $coverCaption -}}
+{{- end -}}
+
+{{- if $caption }}<figure>{{ end -}}
+{{- if $isRemote -}}
+<img src="{{ $destination | safeURL }}" alt="{{ .Text }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
+{{- else -}}
+{{- $image := .Page.Resources.GetMatch $destination -}}
+{{- if not $image -}}
+  {{- $image = .Page.Resources.GetMatch (path.Base $destination) -}}
+{{- end -}}
+{{- if $image -}}
+  {{- partial "modern-picture.html" (dict "page" .Page "image" $image "alt" .Text "title" .Title "loading" "lazy" "decoding" "async") -}}
+{{- else -}}
+<img src="{{ $destination | safeURL }}" alt="{{ .Text }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
+{{- end -}}
+{{- end -}}
+{{- if $caption }}<figcaption>{{ $caption | markdownify }}</figcaption></figure>{{ end -}}

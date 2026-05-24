@@ -3,14 +3,13 @@
 {{- $class := .class | default "" -}}
 {{- $attrs := .attrs | default "" -}}
 {{- $metaMode := .metaMode | default "polaroid" -}}
-{{- $cover := ($photo.Resources.ByType "image").GetMatch "cover.*" -}}
-{{- if not $cover }}{{ $cover = ($photo.Resources.ByType "image").GetMatch "*" }}{{ end -}}
+{{- $cover := partial "photo_source.html" $photo -}}
 {{- if $cover -}}
   {{- $aspect := div (float $cover.Width) (float $cover.Height) -}}
   {{- $orientation := cond (gt $cover.Width $cover.Height) "is-landscape" "is-portrait" -}}
-  {{- $large := $cover.Resize "1200x webp q84" -}}
-  {{- $thumb := $cover.Resize "800x webp q84" -}}
-  {{- $small := $cover.Resize "480x webp q76" -}}
+  {{- $large := $cover.Resize "1200x webp q90" -}}
+  {{- $thumb := $cover.Resize "800x webp q90" -}}
+  {{- $small := $cover.Resize "480x webp q86" -}}
   {{- $isPriority := lt $index 2 -}}
   {{- $wallSize := lower ($photo.Params.wall_size | default "") -}}
   {{- $wallSizeClass := cond (eq $wallSize "large") "is-wall-large" "" -}}

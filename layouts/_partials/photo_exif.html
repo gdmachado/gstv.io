@@ -22,13 +22,13 @@
 {{- with $page.Params.iso }}{{- $polaroidExposureParts = $polaroidExposureParts | append (printf "ISO %s" .) -}}{{- end -}}
 
 {{- if eq $mode "polaroid" -}}
-  {{- with $page.Params.camera }}{{- $items = $items | append (dict "label" "camera" "value" . "quoted" false "kind" "gear") -}}{{- end -}}
-  {{- with $lens }}{{- $items = $items | append (dict "label" "lens" "value" . "quoted" false "kind" "gear") -}}{{- end -}}
-  {{- with $page.Params.focal_length }}{{- $items = $items | append (dict "label" "focal" "value" . "quoted" false "kind" "focal") -}}{{- end -}}
+  {{- with $page.Params.camera }}{{- $items = $items | append (dict "label" "camera" "value" . "quoted" false "kind" "gear" "valueClass" "photo-meta-string") -}}{{- end -}}
+  {{- with $lens }}{{- $items = $items | append (dict "label" "lens" "value" . "quoted" false "kind" "gear" "valueClass" "photo-meta-string") -}}{{- end -}}
+  {{- with $page.Params.focal_length }}{{- $items = $items | append (dict "label" "focal" "value" . "quoted" false "kind" "focal" "valueClass" "photo-meta-string") -}}{{- end -}}
   {{- if gt (len $polaroidExposureParts) 0 -}}
-    {{- $items = $items | append (dict "label" "settings" "value" (delimit $polaroidExposureParts " ") "quoted" false "kind" "settings") -}}
+    {{- $items = $items | append (dict "label" "settings" "value" (delimit $polaroidExposureParts " ") "quoted" false "kind" "settings" "valueClass" "photo-meta-string") -}}
   {{- end -}}
-  {{- with $page.Params.location }}{{- $items = $items | append (dict "label" "place" "value" . "quoted" false "kind" "place") -}}{{- end -}}
+  {{- with $page.Params.location }}{{- $items = $items | append (dict "label" "place" "value" . "quoted" false "kind" "place" "valueClass" "photo-meta-string") -}}{{- end -}}
 {{- else -}}
   {{- with $page.Params.camera }}{{- $items = $items | append (dict "label" "camera" "value" . "quoted" true) -}}{{- end -}}
   {{- with $lens }}{{- $items = $items | append (dict "label" "lens" "value" . "quoted" true) -}}{{- end -}}
@@ -41,15 +41,15 @@
 
 {{- if gt (len $items) 0 -}}
 <div class="photo-meta-object photo-meta-object-{{ $mode }}">
-  {{- if eq $mode "single" }}<div class="photo-meta-brace">photo.meta {</div>{{- end }}
+  {{- if eq $mode "single" }}<div class="photo-meta-brace"><span class="photo-meta-path">photo.meta</span> <span class="photo-meta-punctuation">{</span></div>{{- end }}
   <dl class="photo-exif photo-exif-{{ $mode }}">
   {{- range $index, $item := $items }}
   <div{{ with $item.kind }} class="photo-exif-{{ . }}"{{ end }}>
-    <dt>{{ $item.label }}</dt>
-    <dd>{{ if $item.quoted }}"{{ end }}{{ $item.value }}{{ if $item.quoted }}"{{ end }}{{ if eq $mode "single" }}{{ if lt (add $index 1) (len $items) }},{{ end }}{{ end }}</dd>
+    <dt><span class="photo-meta-key">{{ $item.label }}</span></dt>
+    <dd>{{ if $item.quoted }}<span class="photo-meta-punctuation">"</span><span class="photo-meta-string">{{ $item.value }}</span><span class="photo-meta-punctuation">"</span>{{ else }}<span class="{{ $item.valueClass | default "photo-meta-number" }}">{{ $item.value }}</span>{{ end }}{{ if eq $mode "single" }}{{ if lt (add $index 1) (len $items) }}<span class="photo-meta-punctuation">,</span>{{ end }}{{ end }}</dd>
   </div>
   {{- end }}
   </dl>
-  {{- if eq $mode "single" }}<div class="photo-meta-brace">}</div>{{- end }}
+  {{- if eq $mode "single" }}<div class="photo-meta-brace"><span class="photo-meta-punctuation">}</span></div>{{- end }}
 </div>
 {{- end -}}

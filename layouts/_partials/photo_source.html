@@ -1,0 +1,15 @@
+{{- $images := .Resources.ByType "image" -}}
+{{- $photo := $images.GetMatch "photo.jpg" -}}
+{{- if not $photo }}{{ $photo = $images.GetMatch "photo.jpeg" }}{{ end -}}
+{{- if not $photo }}{{ $photo = $images.GetMatch "photo.png" }}{{ end -}}
+{{- if not $photo }}{{ $photo = $images.GetMatch "cover.jpg" }}{{ end -}}
+{{- if not $photo }}{{ $photo = $images.GetMatch "cover.jpeg" }}{{ end -}}
+{{- if not $photo }}{{ $photo = $images.GetMatch "cover.png" }}{{ end -}}
+{{- if not $photo -}}
+  {{- range $images -}}
+    {{- if and (not $photo) (in (slice ".jpg" ".jpeg" ".png") (lower (path.Ext .Name))) -}}
+      {{- $photo = . -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $photo -}}
