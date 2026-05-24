@@ -16,6 +16,12 @@ minify:
   disableXML: true
   minifyOutput: true
 
+imaging:
+  webp:
+    hint: photo
+    method: 6
+    useSharpYuv: true
+
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
   title: Gus Machado

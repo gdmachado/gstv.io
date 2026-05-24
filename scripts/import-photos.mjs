@@ -3,10 +3,12 @@ import { createReadStream } from "node:fs";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { stampPhotoFileMetadata } from "./photo-file-metadata.mjs";
 
 const ROOT = process.cwd();
 const SOURCE_DIR = path.resolve(ROOT, process.argv[2] || ".context/photo-imports");
 const PHOTO_DIR = path.join(ROOT, "content/photos");
+const PHOTO_SOURCE_LONG_EDGE = "3200";
 const METADATA_FIELDS = [
   "kMDItemAcquisitionMake",
   "kMDItemAcquisitionModel",
@@ -226,7 +228,8 @@ async function importPhoto(sourcePath) {
   const targetIndex = path.join(targetDir, "index.md");
 
   await fs.mkdir(targetDir, { recursive: true });
-  await run("sips", ["-Z", "2400", "-s", "format", "jpeg", "-s", "formatOptions", "95", sourcePath, "--out", targetImage]);
+  await run("sips", ["-Z", PHOTO_SOURCE_LONG_EDGE, "-s", "format", "jpeg", "-s", "formatOptions", "95", sourcePath, "--out", targetImage]);
+  await stampPhotoFileMetadata(targetImage, run);
 
   let hasIndex = true;
   try {

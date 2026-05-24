@@ -22,27 +22,27 @@
     </div>
   {{- else -}}
     <div class="photo-meta-object photo-credits-object photo-credits-object-{{ $mode }}">
-      <div class="photo-meta-brace">photo.credits [</div>
+      <div class="photo-meta-brace"><span class="photo-meta-path">photo.credits</span> <span class="photo-meta-punctuation">[</span></div>
       <ol class="photo-credits-list">
         {{- range $index, $credit := $credits }}
           {{- $role := $credit.role | default "credit" -}}
           {{- $label := or $credit.handle $credit.name -}}
           {{- if $label }}
             <li>
-              <span class="photo-meta-brace">{</span>
-              <span class="photo-credit-key">role</span>: "{{ $role }}",
-              <span class="photo-credit-key">handle</span>:
+              <span class="photo-meta-punctuation">{</span>
+              <span class="photo-credit-key photo-meta-key">role</span><span class="photo-meta-punctuation">:</span> <span class="photo-meta-punctuation">"</span><span class="photo-meta-string">{{ $role }}</span><span class="photo-meta-punctuation">",</span>
+              <span class="photo-credit-key photo-meta-key">handle</span><span class="photo-meta-punctuation">:</span>
               {{- with $credit.url }}
-                <a href="{{ . }}" rel="noopener noreferrer" target="_blank">"{{ $label }}"</a>
+                <span class="photo-meta-punctuation">"</span><a class="photo-meta-link" href="{{ . }}" rel="noopener noreferrer" target="_blank">{{ $label }}</a><span class="photo-meta-punctuation">"</span>
               {{- else }}
-                <span>"{{ $label }}"</span>
+                <span class="photo-meta-punctuation">"</span><span class="photo-meta-string">{{ $label }}</span><span class="photo-meta-punctuation">"</span>
               {{- end }}
-              <span class="photo-meta-brace">}</span>{{ if lt (add $index 1) (len $credits) }},{{ end }}
+              <span class="photo-meta-punctuation">}</span>{{ if lt (add $index 1) (len $credits) }}<span class="photo-meta-punctuation">,</span>{{ end }}
             </li>
           {{- end }}
         {{- end }}
       </ol>
-      <div class="photo-meta-brace">]</div>
+      <div class="photo-meta-brace"><span class="photo-meta-punctuation">]</span></div>
     </div>
   {{- end -}}
 {{- end -}}

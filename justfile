@@ -9,6 +9,10 @@ dev:
 build: clean
     bun run build
 
+# Generate AVIF and WebP sidecars for content images
+images:
+    bun run images
+
 # Remove generated artifacts
 clean:
     rm -rf public resources
@@ -20,6 +24,10 @@ new SLUG:
 # Import Lightroom-exported JPEGs into opaque photo bundles
 photos-import DIR=".context/photo-imports":
     bun scripts/import-photos.mjs "{{DIR}}"
+
+# Normalize copyright metadata on canonical photo files
+photos-stamp-metadata:
+    bun scripts/stamp-photo-metadata.mjs
 
 # Bump PaperMod theme to latest master and tidy go.sum
 update-theme:

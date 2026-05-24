@@ -277,6 +277,9 @@ async function checkPhotoArchiveUsesSalonWallAndCredits() {
 
   const archive = await fs.readFile(path.join(ROOT, "public/photos/index.html"), "utf8");
   const creditedSingle = await fs.readFile(path.join(ROOT, "public/photos/ph-77340f8f8d/index.html"), "utf8");
+  const photoSingleTemplate = await fs.readFile(path.join(ROOT, "layouts/photos/single.html"), "utf8");
+  const photoSalonTemplate = await fs.readFile(path.join(ROOT, "layouts/_partials/photo_salon_item.html"), "utf8");
+  const photoSourcePartial = await fs.readFile(path.join(ROOT, "layouts/_partials/photo_source.html"), "utf8");
   const script = await fs.readFile(path.join(ROOT, "assets/js/photo-enhancements.js"), "utf8");
   const css = await fs.readFile(path.join(ROOT, "assets/css/extended/90-pages.css"), "utf8");
 
@@ -286,11 +289,25 @@ async function checkPhotoArchiveUsesSalonWallAndCredits() {
   assert.match(archive, /photo-credits-polaroid/, "salon wall should render compact credits when present");
   assert.match(archive, /data-wall-size=["']?large/, "salon wall should expose optional large wall sizing");
   assert.match(archive, /\/photos\/ph-[a-f0-9]{10}\//, "photo URLs should use opaque hash slugs");
-  assert.match(creditedSingle, /photo\.credits \[/, "single photo pages should render full credit objects");
-  assert.match(creditedSingle, /role<\/span>: "model"/, "single photo credit objects should include roles");
+  assert.match(creditedSingle, /class=["']?photo-meta-path["']?>photo\.credits<\/span>\s*<span class=["']?photo-meta-punctuation["']?>\[/, "single photo pages should render full credit objects");
+  assert.match(creditedSingle, /class=["']photo-credit-key photo-meta-key["']>role<\/span><span class=["']?photo-meta-punctuation["']?>:/, "single photo credit objects should tokenize roles");
+  assert.match(creditedSingle, /class=["']?photo-meta-path["']?>photo\.meta<\/span>/, "single photo metadata should tokenize the object path");
+  assert.match(creditedSingle, /class=["']?photo-meta-key["']?>camera<\/span>/, "single photo metadata should tokenize keys");
+  assert.match(creditedSingle, /class=["']?photo-meta-string["']?>Nikon D810<\/span>/, "single photo metadata should tokenize strings");
+  assert.match(creditedSingle, /class=["']?photo-meta-number["']?>100<\/span>/, "single photo metadata should tokenize numbers");
+  assert.match(creditedSingle, /class=["']?photo-meta-link["']?[^>]*>@guimaraesadriane<\/a>/, "single photo credits should tokenize linked string values");
   assert.match(creditedSingle, /data-photo-single/, "single photo pages should expose the photo viewer hook");
   assert.match(creditedSingle, /data-photo-viewer/, "single photo pages should render the image viewer shell");
   assert.match(creditedSingle, /data-photo-viewer-open/, "single photo images should open the viewer");
+  assert.match(photoSingleTemplate, /partial "photo_source\.html"/, "single photo pages should use the shared canonical source selector");
+  assert.doesNotMatch(photoSingleTemplate, /range \(\.Resources\.ByType "image"\)/, "single photo pages should not render generated sidecars as extra figures");
+  assert.match(photoSingleTemplate, /math\.Min 3200 \.Width/, "single photo viewer should align with the 3200px source standard");
+  assert.match(photoSingleTemplate, /webp q95/, "single photo pages should use high-quality WebP renditions");
+  assert.match(photoSalonTemplate, /partial "photo_source\.html"/, "photo archive cards should use the shared canonical source selector");
+  assert.doesNotMatch(photoSalonTemplate, /GetMatch "\*"/, "photo archive cards should not select generated sidecars");
+  assert.match(photoSalonTemplate, /1200x webp q90/, "photo archive cards should keep large thumbnails high quality");
+  assert.match(photoSourcePartial, /GetMatch "photo\.jpg"/, "shared photo source selector should prefer canonical photo sources");
+  assert.doesNotMatch(photoSourcePartial, /\.avif|\.webp/, "shared photo source selector should ignore generated sidecars");
   assert.match(script, /function initSalonWall\(/, "photo enhancements should initialize the salon wall packer");
   assert.match(script, /function initPhotoViewer\(/, "photo enhancements should initialize the photo viewer");
   assert.match(script, /data-photo-viewer-zoom/, "photo detail viewer should wire zoom controls");
@@ -324,6 +341,8 @@ async function checkPhotoArchiveUsesSalonWallAndCredits() {
   assert.match(css, /\.photo-credits-polaroid/, "photo CSS should style compact credits");
   assert.match(css, /\.photo-detail-shell/, "photo CSS should style the single photo detail layout");
   assert.match(css, /\.photo-viewer/, "photo CSS should style the image viewer overlay");
+  assert.match(css, /\.photo-viewer\s*\{[^}]*z-index:\s*1000002/s, "photo viewer should sit above the sticky site header");
+  assert.match(css, /\.photo-meta-link\s*\{[^}]*text-decoration-line:\s*underline/s, "photo metadata links should keep a visible underline");
   assert.match(css, /grid-template-rows:\s*minmax\(0,\s*1fr\)\s*auto/, "photo viewer should reserve space for controls while fitting the image");
   assert.match(css, /\.photo-salon-frame\.is-wall-large/, "photo CSS should provide a large sizing fallback");
   assert.match(css, /\.photo-salon-wall\.is-positioned/, "photo CSS should support positioned salon packing");
@@ -334,10 +353,16 @@ async function checkPhotoArchiveUsesSalonWallAndCredits() {
 async function checkPhotoImportWorkflowDocumented() {
   const justfile = await fs.readFile(path.join(ROOT, "Justfile"), "utf8");
   const script = await fs.readFile(path.join(ROOT, "scripts/import-photos.mjs"), "utf8");
+  const fileMetadata = await fs.readFile(path.join(ROOT, "scripts/photo-file-metadata.mjs"), "utf8");
   const docs = await fs.readFile(path.join(ROOT, "AUTHORING.md"), "utf8");
 
   assert.match(justfile, /photos-import/, "Justfile should expose the photo import workflow");
+  assert.match(justfile, /photos-stamp-metadata/, "Justfile should expose the photo metadata stamping workflow");
   assert.match(script, /sips/, "photo importer should optimize exported JPEGs");
+  assert.match(script, /PHOTO_SOURCE_LONG_EDGE = "3200"/, "photo importer should preserve a 3200px long-edge source");
+  assert.match(script, /stampPhotoFileMetadata/, "photo importer should stamp file-level copyright metadata");
+  assert.match(fileMetadata, /jpegtran[\s\S]*"-copy"[\s\S]*"icc"/, "photo metadata stamping should remove stale metadata while preserving ICC profiles");
+  assert.match(fileMetadata, /PHOTO_COPYRIGHT = "Copyright Gus Machado \(gstv\.io\)"/, "photo metadata should include the site copyright");
   assert.match(script, /ph-\$\{hash\.slice\(0, 10\)\}/, "photo importer should create opaque hash slugs");
   assert.match(script, /kMDItemCity/, "photo importer should read city-level metadata");
   assert.match(script, /kMDItemCountry/, "photo importer should read country-level metadata");
@@ -346,6 +371,44 @@ async function checkPhotoImportWorkflowDocumented() {
   assert.match(docs, /just photos-import/, "authoring docs should describe the photo import command");
   assert.match(docs, /wall_size: "large"/, "authoring docs should describe optional large wall sizing");
   assert.match(docs, /city\/country/, "authoring docs should document location granularity");
+}
+
+async function checkModernImagePipeline() {
+  const packageJson = await fs.readFile(path.join(ROOT, "package.json"), "utf8");
+  const hugoConfig = await fs.readFile(path.join(ROOT, "hugo.yaml"), "utf8");
+  const justfile = await fs.readFile(path.join(ROOT, "Justfile"), "utf8");
+  const imageScript = await fs.readFile(path.join(ROOT, "scripts/generate-modern-images.mjs"), "utf8");
+  const server = await fs.readFile(path.join(ROOT, "scripts/serve-public.mjs"), "utf8");
+  const picture = await fs.readFile(path.join(ROOT, "layouts/partials/modern-picture.html"), "utf8");
+  const renderImage = await fs.readFile(path.join(ROOT, "layouts/_default/_markup/render-image.html"), "utf8");
+  const cover = await fs.readFile(path.join(ROOT, "layouts/partials/cover.html"), "utf8");
+  const figure = await fs.readFile(path.join(ROOT, "layouts/shortcodes/figure.html"), "utf8");
+  const ogImage = await fs.readFile(path.join(ROOT, "layouts/partials/og-image.html"), "utf8");
+  const openGraph = await fs.readFile(path.join(ROOT, "layouts/partials/templates/opengraph.html"), "utf8");
+  const twitterCards = await fs.readFile(path.join(ROOT, "layouts/partials/templates/twitter_cards.html"), "utf8");
+  const extendHead = await fs.readFile(path.join(ROOT, "layouts/partials/extend_head.html"), "utf8");
+  const contentCss = await fs.readFile(path.join(ROOT, "assets/css/extended/40-content.css"), "utf8");
+
+  assert.match(packageJson, /"images":\s*"bun scripts\/generate-modern-images\.mjs"/, "package scripts should expose the image sidecar generator");
+  assert.match(hugoConfig, /method:\s*6/, "Hugo WebP encoding should use high-effort compression");
+  assert.match(hugoConfig, /useSharpYuv:\s*true/, "Hugo WebP encoding should prioritize sharp color conversion");
+  assert.match(justfile, /^images:/m, "Justfile should expose the image sidecar generator");
+  assert.match(imageScript, /avifenc/, "image pipeline should generate AVIF sidecars");
+  assert.match(imageScript, /cwebp/, "image pipeline should generate WebP sidecars");
+  assert.match(imageScript, /SKIPPED_DIRS[\s\S]*"photos"/, "image pipeline should not create sidecars for photo gallery originals");
+  assert.match(server, /\["\.avif", "image\/avif"\]/, "local server should serve AVIF with the correct MIME type");
+  assert.match(picture, /type="image\/avif"/, "modern picture partial should prefer AVIF");
+  assert.match(picture, /type="image\/webp"/, "modern picture partial should include WebP fallback");
+  assert.match(picture, /resources\.ByType "image"/, "modern picture partial should find global resource sidecars");
+  assert.match(picture, /imageStyle[\s\S]*safeCSS/, "modern picture partial should allow shortcode CSS widths");
+  assert.match(renderImage, /partial "modern-picture\.html"/, "markdown images should use modern picture markup");
+  assert.match(cover, /partial "modern-picture\.html"/, "post covers should use modern picture markup");
+  assert.match(figure, /imageStyle/, "figure shortcode should preserve percentage widths with modern picture markup");
+  assert.match(contentCss, /figure\.align-center[\s\S]*margin-inline:\s*auto/, "post figure CSS should keep centered images centered");
+  assert.match(ogImage, /cover\.image/, "OG image generation should incorporate page covers");
+  assert.match(extendHead, /\.Scratch\.Set "ogImage"/, "head extension should pass generated OG images to theme metadata templates");
+  assert.match(openGraph, /Scratch\.Get "ogImage"/, "OpenGraph template should emit generated OG images");
+  assert.match(twitterCards, /Scratch\.Get "ogImage"/, "Twitter cards template should emit generated OG images");
 }
 
 async function waitForServer(child) {
@@ -410,6 +473,7 @@ const checks = [
   ["photo archive paginates and exposes loader hooks", checkPhotoArchivePaginationAndLoaderHooks],
   ["photo archive uses salon wall and credits", checkPhotoArchiveUsesSalonWallAndCredits],
   ["photo import workflow is documented", checkPhotoImportWorkflowDocumented],
+  ["modern image pipeline is wired", checkModernImagePipeline],
   ["malformed URLs return a bad request", checkMalformedUrlsReturnBadRequest],
 ];
 

@@ -44,6 +44,27 @@ html[data-theme="light"] .post-entry:hover {
     transform: scale(1.03);
 }
 
+.entry-cover > figcaption,
+.md-content figure:not(.code-window):not(.pull-quote) > figcaption {
+    color: var(--tertiary);
+    font-size: var(--text-sm);
+    font-weight: 400;
+}
+
+.md-content figure:not(.code-window):not(.pull-quote) > picture {
+    display: block;
+}
+
+.md-content figure:not(.code-window):not(.pull-quote) img {
+    max-width: 100%;
+    height: auto;
+}
+
+.md-content figure.align-center > picture,
+.md-content figure.align-center img {
+    margin-inline: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .post-entry, .post-entry .entry-cover img { transition: none; }
     .post-entry:hover { transform: none; }

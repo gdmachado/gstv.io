@@ -144,6 +144,63 @@ html[data-theme="dark"] {
 .photo-meta-object {
     margin: 0;
     font-family: var(--font-mono);
+    --photo-meta-path-color: var(--ctp-latte-mauve);
+    --photo-meta-key-color: var(--ctp-latte-blue);
+    --photo-meta-string-color: var(--ctp-latte-green);
+    --photo-meta-number-color: var(--ctp-latte-yellow);
+    --photo-meta-punctuation-color: var(--ctp-latte-subtext1);
+}
+
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) .photo-meta-object {
+        --photo-meta-path-color: var(--ctp-mocha-mauve);
+        --photo-meta-key-color: var(--ctp-mocha-blue);
+        --photo-meta-string-color: var(--ctp-mocha-green);
+        --photo-meta-number-color: var(--ctp-mocha-yellow);
+        --photo-meta-punctuation-color: var(--ctp-mocha-subtext0);
+    }
+}
+
+html[data-theme="dark"] .photo-meta-object {
+    --photo-meta-path-color: var(--ctp-mocha-mauve);
+    --photo-meta-key-color: var(--ctp-mocha-blue);
+    --photo-meta-string-color: var(--ctp-mocha-green);
+    --photo-meta-number-color: var(--ctp-mocha-yellow);
+    --photo-meta-punctuation-color: var(--ctp-mocha-subtext0);
+}
+
+html[data-theme="light"] .photo-meta-object {
+    --photo-meta-path-color: var(--ctp-latte-mauve);
+    --photo-meta-key-color: var(--ctp-latte-blue);
+    --photo-meta-string-color: var(--ctp-latte-green);
+    --photo-meta-number-color: var(--ctp-latte-yellow);
+    --photo-meta-punctuation-color: var(--ctp-latte-subtext1);
+}
+
+html[data-syntax="cb"] .photo-meta-object {
+    --photo-meta-path-color: #cc79a7;
+    --photo-meta-key-color: #0072b2;
+    --photo-meta-string-color: #009e73;
+    --photo-meta-number-color: #e69f00;
+    --photo-meta-punctuation-color: #5d6678;
+}
+
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"])[data-syntax="cb"] .photo-meta-object {
+        --photo-meta-path-color: #cc79a7;
+        --photo-meta-key-color: #56b4e9;
+        --photo-meta-string-color: #009e73;
+        --photo-meta-number-color: #e69f00;
+        --photo-meta-punctuation-color: #aeb8ca;
+    }
+}
+
+html[data-theme="dark"][data-syntax="cb"] .photo-meta-object {
+    --photo-meta-path-color: #cc79a7;
+    --photo-meta-key-color: #56b4e9;
+    --photo-meta-string-color: #009e73;
+    --photo-meta-number-color: #e69f00;
+    --photo-meta-punctuation-color: #aeb8ca;
 }
 
 .photo-exif {
@@ -169,11 +226,45 @@ html[data-theme="dark"] {
 
 .photo-exif dt::after {
     content: ":";
-    color: color-mix(in srgb, var(--primary) 48%, var(--secondary));
+    color: var(--photo-meta-punctuation-color);
 }
 
 .photo-exif dd {
     color: var(--primary);
+}
+
+.photo-meta-path {
+    color: var(--photo-meta-path-color);
+}
+
+.photo-meta-key,
+.photo-credit-key {
+    color: var(--photo-meta-key-color);
+}
+
+.photo-meta-string {
+    color: var(--photo-meta-string-color);
+}
+
+.photo-meta-number {
+    color: var(--photo-meta-number-color);
+}
+
+.photo-meta-punctuation {
+    color: var(--photo-meta-punctuation-color);
+}
+
+.photo-meta-link {
+    color: var(--photo-meta-string-color);
+    text-decoration-line: underline;
+    text-decoration-color: color-mix(in srgb, var(--photo-meta-string-color) 42%, transparent);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.22em;
+}
+
+.photo-meta-link:hover {
+    color: var(--link-hover);
+    text-decoration-color: currentColor;
 }
 
 .photo-lab-frame {
@@ -608,10 +699,6 @@ html[data-theme="dark"] {
     list-style: none;
 }
 
-.photo-credit-key {
-    color: color-mix(in srgb, var(--primary) 70%, var(--secondary));
-}
-
 @media (min-width: 1340px) {
     .photo-single.has-photo-meta {
         max-width: var(--photo-main-width);
@@ -713,7 +800,7 @@ html[data-theme="dark"] {
     background:
         radial-gradient(circle at 50% 10%, color-mix(in srgb, var(--link) 10%, transparent), transparent 34rem),
         color-mix(in srgb, var(--theme) 94%, black);
-    z-index: 100;
+    z-index: 1000002;
 }
 
 .photo-viewer[hidden] {
