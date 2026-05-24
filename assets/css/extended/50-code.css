@@ -423,12 +423,41 @@ html[data-syntax="cb"] .code-window .chroma-code {
 }
 
 @media (max-width: 640px) {
+    .code-window {
+        margin: 1.55rem 0;
+        border-radius: 7px;
+    }
+
+    .code-window .shiki-source {
+        padding: 1.2rem 0;
+    }
+
+    .code-window .shiki-code {
+        font-size: 0.82rem;
+        line-height: 1.58;
+    }
+
+    .code-window .shiki-code .line {
+        grid-template-columns: 2.65rem max-content;
+        min-height: 1.58em;
+    }
+
+    .code-window .line-number {
+        padding: 0 0.7rem 0 0.55rem;
+    }
+
     .md-content .code-window pre code {
         padding-right: 4.25rem !important;
     }
 
     .code-window .line-code {
-        padding-right: 4.25rem !important;
+        padding-right: 3.6rem !important;
+    }
+
+    .code-lang {
+        top: 0.65rem;
+        right: 0.75rem;
+        font-size: 0.68rem;
     }
 
     .code-window .copy-code {

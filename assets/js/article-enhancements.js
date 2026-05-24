@@ -92,15 +92,56 @@
     update();
     document.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
+
+    const disclosure = toc.closest("[data-responsive-toc]");
+    if (disclosure) disclosure.addEventListener("toggle", update);
+  }
+
+  function initResponsiveToc() {
+    const disclosure = document.querySelector("[data-responsive-toc]");
+    if (!disclosure) return;
+
+    const narrow = window.matchMedia("(max-width: 1220px)");
+    let userToggled = false;
+
+    function sync() {
+      if (narrow.matches) {
+        if (!userToggled) disclosure.open = false;
+      } else {
+        disclosure.open = true;
+        userToggled = false;
+      }
+    }
+
+    disclosure.addEventListener("toggle", () => {
+      if (narrow.matches) userToggled = true;
+    });
+
+    disclosure.querySelectorAll('.docs-toc a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", () => {
+        if (!narrow.matches) return;
+        window.setTimeout(() => {
+          disclosure.open = false;
+          userToggled = false;
+        }, 120);
+      });
+    });
+
+    if (narrow.addEventListener) narrow.addEventListener("change", sync);
+    else narrow.addListener(sync);
+
+    sync();
   }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       initShareButtons();
+      initResponsiveToc();
       initTocSpy();
     });
   } else {
     initShareButtons();
+    initResponsiveToc();
     initTocSpy();
   }
 })();

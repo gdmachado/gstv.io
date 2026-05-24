@@ -59,10 +59,12 @@ just clean && just build
 hugo server --buildDrafts --navigateToChanged
 ```
 
-```go
-func fib(n int) int {
-    if n < 2 { return n }
-    return fib(n-1) + fib(n-2)
+```rust
+fn fib(n: u64) -> u64 {
+    match n {
+        0 | 1 => n,
+        _ => fib(n - 1) + fib(n - 2),
+    }
 }
 ```
 

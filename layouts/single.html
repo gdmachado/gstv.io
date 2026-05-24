@@ -68,7 +68,13 @@
 
     {{- if $showToc }}
     <aside class="post-sidebar" aria-label="Article navigation">
-      {{- partial "toc.html" . }}
+      <details class="post-toc-disclosure" data-responsive-toc open>
+        <summary class="toc-disclosure-summary">
+          <span>Table of Contents</span>
+          <span class="toc-disclosure-meta">{{ len $headers }} sections</span>
+        </summary>
+        {{- partial "toc.html" . }}
+      </details>
     </aside>
     {{- end }}
   </div>
