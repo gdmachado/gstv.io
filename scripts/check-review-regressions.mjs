@@ -210,6 +210,144 @@ async function checkPostNavigationAndTocDepth() {
   }
 }
 
+async function readPhotoPageSize() {
+  const config = await fs.readFile(path.join(ROOT, "hugo.yaml"), "utf8");
+  const match = config.match(/photos:\s*\n(?:[^\n]*\n)*?\s+pageSize:\s*(\d+)/);
+  return match ? Number(match[1]) : 6;
+}
+
+async function checkPhotoArchivePaginationAndLoaderHooks() {
+  const pageSize = await readPhotoPageSize();
+  const sourceImage = path.join(ROOT, "content/photos/ph-185f4adbb6/photo.jpg");
+  const tempSlugs = Array.from({ length: pageSize + 1 }, (_, index) => {
+    return `review-pagination-photo-${process.pid}-${index}`;
+  });
+
+  try {
+    for (const [index, slug] of tempSlugs.entries()) {
+      const dir = path.join(ROOT, "content/photos", slug);
+      await fs.mkdir(dir, { recursive: true });
+      await fs.copyFile(sourceImage, path.join(dir, "photo.jpg"));
+      await fs.writeFile(
+        path.join(dir, "index.md"),
+        `---\ntitle: Review Pagination Photo ${index}\ndate: 2026-01-${String(index + 1).padStart(2, "0")}T00:00:00Z\ncamera: "Test Camera"\nlens: "Test 50mm f/1.8"\naperture: "f/2.8"\nshutter: "1/125"\niso: "200"\n---\n`,
+      );
+    }
+
+    await fs.rm(path.join(ROOT, "public"), { recursive: true, force: true });
+    await fs.rm(path.join(ROOT, "resources"), { recursive: true, force: true });
+    await run("bun", ["run", "build:hugo", "--", "--logLevel", "error"]);
+
+    const firstPage = await fs.readFile(path.join(ROOT, "public/photos/index.html"), "utf8");
+    const secondPage = await fs.readFile(path.join(ROOT, "public/photos/page/2/index.html"), "utf8");
+    const script = await fs.readFile(path.join(ROOT, "assets/js/photo-enhancements.js"), "utf8");
+    const css = await fs.readFile(path.join(ROOT, "assets/css/extended/90-pages.css"), "utf8");
+
+    const firstPageCards = firstPage.match(/data-photo-item/g) || [];
+    const secondPageCards = secondPage.match(/data-photo-item/g) || [];
+
+    assert.equal(firstPageCards.length, pageSize, "first photos page should render one bounded batch");
+    assert.ok(secondPageCards.length > 0, "second photos page should render another batch");
+    assert.ok(secondPageCards.length <= pageSize, "second photos page should stay bounded");
+    assert.match(firstPage, /data-photo-grid/, "photos archive should expose a grid hook");
+    assert.match(firstPage, /class="?photo-salon-wall/, "photos archive should use the salon wall layout");
+    assert.match(firstPage, /data-photo-item/, "photos archive should expose photo item hooks");
+    assert.match(secondPage, /data-frame="?07"?/, "second photos page should continue frame numbering");
+    assert.match(firstPage, /data-photo-next/, "photos archive should expose a next-page hook");
+    assert.match(firstPage, /data-photo-skeletons/, "photos archive should include loading skeletons");
+    assert.match(firstPage, /ƒ\//, "photos archive should use the aperture glyph in gallery metadata");
+    assert.match(firstPage, /Test 50mm ƒ\/1\.8/, "photos archive should use the aperture glyph in lens names");
+    assert.match(script, /function initPhotoPager\(/, "photo enhancements should initialize the photo pager");
+    assert.match(script, /IntersectionObserver/, "photo pager should use IntersectionObserver for auto loading");
+    assert.match(script, /photos:items-added/, "photo pager should ask the salon wall to repack appended items");
+    assert.match(css, /\.photos-grid-skeletons\[hidden\]/, "hidden photo skeletons should stay hidden");
+  } finally {
+    for (const slug of tempSlugs) {
+      await fs.rm(path.join(ROOT, "content/photos", slug), { recursive: true, force: true });
+    }
+    await fs.rm(path.join(ROOT, "public"), { recursive: true, force: true });
+    await fs.rm(path.join(ROOT, "resources"), { recursive: true, force: true });
+  }
+}
+
+async function checkPhotoArchiveUsesSalonWallAndCredits() {
+  await fs.rm(path.join(ROOT, "public"), { recursive: true, force: true });
+  await fs.rm(path.join(ROOT, "resources"), { recursive: true, force: true });
+  await run("bun", ["run", "build:hugo", "--", "--logLevel", "error"]);
+
+  const archive = await fs.readFile(path.join(ROOT, "public/photos/index.html"), "utf8");
+  const creditedSingle = await fs.readFile(path.join(ROOT, "public/photos/ph-77340f8f8d/index.html"), "utf8");
+  const script = await fs.readFile(path.join(ROOT, "assets/js/photo-enhancements.js"), "utf8");
+  const css = await fs.readFile(path.join(ROOT, "assets/css/extended/90-pages.css"), "utf8");
+
+  assert.match(archive, /photo-enhancements/, "photo pages should load the photo enhancements bundle");
+  assert.match(archive, /class="?photo-salon-wall/, "photos archive should render the salon wall");
+  assert.match(archive, /photo-exif-polaroid/, "salon wall should render always-visible photo metadata");
+  assert.match(archive, /photo-credits-polaroid/, "salon wall should render compact credits when present");
+  assert.match(archive, /data-wall-size=["']?large/, "salon wall should expose optional large wall sizing");
+  assert.match(archive, /\/photos\/ph-[a-f0-9]{10}\//, "photo URLs should use opaque hash slugs");
+  assert.match(creditedSingle, /photo\.credits \[/, "single photo pages should render full credit objects");
+  assert.match(creditedSingle, /role<\/span>: "model"/, "single photo credit objects should include roles");
+  assert.match(creditedSingle, /data-photo-single/, "single photo pages should expose the photo viewer hook");
+  assert.match(creditedSingle, /data-photo-viewer/, "single photo pages should render the image viewer shell");
+  assert.match(creditedSingle, /data-photo-viewer-open/, "single photo images should open the viewer");
+  assert.match(script, /function initSalonWall\(/, "photo enhancements should initialize the salon wall packer");
+  assert.match(script, /function initPhotoViewer\(/, "photo enhancements should initialize the photo viewer");
+  assert.match(script, /data-photo-viewer-zoom/, "photo detail viewer should wire zoom controls");
+  assert.match(script, /function fitImageToStage\(/, "photo detail viewer should fit images to the visible stage");
+  assert.match(script, /function getPanBounds\(/, "photo detail viewer should measure actual image overflow for panning");
+  assert.match(script, /is-pannable/, "photo detail viewer should only present drag affordance when panning is available");
+  assert.match(script, /suppressClick/, "photo detail viewer should distinguish drag from click-to-close");
+  assert.match(script, /event\.target === image/, "photo detail viewer should let image clicks close the overlay");
+  assert.match(script, /lastPackedWidth/, "salon wall packer should ignore height-only resize observer callbacks");
+  assert.match(script, /function bestSlot\(/, "salon wall packer should use skyline placement");
+  assert.match(script, /function spanProfile\(/, "salon wall packer should allow flexible item spans");
+  assert.match(script, /wallSize === "large"/, "salon wall packer should support neutral large sizing");
+  assert.match(script, /function candidateSpans\(/, "salon wall packer should test multiple spans per item");
+  assert.match(script, /function candidateSlots\(/, "salon wall packer should evaluate every possible skyline slot");
+  assert.match(script, /function skylineStats\(/, "salon wall packer should score whole-wall compactness");
+  assert.match(script, /function chooseCandidate\(/, "salon wall packer should use lookahead placement");
+  assert.match(script, /leavesUnfillableRightGap/, "salon wall packer should reject tiny right-edge leftovers");
+  assert.match(script, /deadArea/, "salon wall packer should penalize broad blank areas");
+  assert.match(script, /raggedness/, "salon wall packer should penalize vertical rails");
+  assert.match(script, /valleyReward/, "salon wall packer should prefer visible gaps without raw y-position bias");
+  assert.match(script, /function repackTail\(/, "salon wall packer should tidy the bottom cluster");
+  assert.match(script, /function tailCandidates\(/, "salon wall tail should pick a deterministic bottom visual band");
+  assert.match(script, /bottomMostTop/, "salon wall tail should avoid right-rail bottom fragments");
+  assert.match(script, /left\.column - right\.column/, "salon wall tail should read left to right");
+  assert.match(script, /rowFloor/, "salon wall tail should sit below any anchored column");
+  assert.match(script, /tailBottom/, "salon wall tail should use the true bottom cluster");
+  assert.match(script, /rowY/, "salon wall tail should align as a deliberate final row");
+  assert.match(script, /heightForSpan/, "salon wall packer should measure candidate height for the chosen span");
+  assert.match(script, /is-positioned/, "salon wall packer should switch to stable absolute placement");
+  assert.match(script, /image\.hasAttribute\("width"\) && image\.hasAttribute\("height"\)/, "image loads with known dimensions should not force scroll-time repacks");
+  assert.match(css, /\.photo-credits-polaroid/, "photo CSS should style compact credits");
+  assert.match(css, /\.photo-detail-shell/, "photo CSS should style the single photo detail layout");
+  assert.match(css, /\.photo-viewer/, "photo CSS should style the image viewer overlay");
+  assert.match(css, /grid-template-rows:\s*minmax\(0,\s*1fr\)\s*auto/, "photo viewer should reserve space for controls while fitting the image");
+  assert.match(css, /\.photo-salon-frame\.is-wall-large/, "photo CSS should provide a large sizing fallback");
+  assert.match(css, /\.photo-salon-wall\.is-positioned/, "photo CSS should support positioned salon packing");
+  assert.match(css, /box-sizing:\s*border-box/, "photo frame widths should include padding and borders");
+  assert.match(css, /--photo-wall-max:\s*1480px/, "photo archive should define an explicit wall width");
+}
+
+async function checkPhotoImportWorkflowDocumented() {
+  const justfile = await fs.readFile(path.join(ROOT, "Justfile"), "utf8");
+  const script = await fs.readFile(path.join(ROOT, "scripts/import-photos.mjs"), "utf8");
+  const docs = await fs.readFile(path.join(ROOT, "AUTHORING.md"), "utf8");
+
+  assert.match(justfile, /photos-import/, "Justfile should expose the photo import workflow");
+  assert.match(script, /sips/, "photo importer should optimize exported JPEGs");
+  assert.match(script, /ph-\$\{hash\.slice\(0, 10\)\}/, "photo importer should create opaque hash slugs");
+  assert.match(script, /kMDItemCity/, "photo importer should read city-level metadata");
+  assert.match(script, /kMDItemCountry/, "photo importer should read country-level metadata");
+  assert.doesNotMatch(script, /kMDItemLatitude|kMDItemLongitude/, "photo importer should not publish exact GPS coordinates");
+  assert.match(script, /wall_size: "large"/, "photo importer should document optional large wall sizing");
+  assert.match(docs, /just photos-import/, "authoring docs should describe the photo import command");
+  assert.match(docs, /wall_size: "large"/, "authoring docs should describe optional large wall sizing");
+  assert.match(docs, /city\/country/, "authoring docs should document location granularity");
+}
+
 async function waitForServer(child) {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error("server did not start")), 5000);
@@ -269,6 +407,9 @@ const checks = [
   ["body font size uses base token", checkBodyFontSizeUsesBaseToken],
   ["typography page uses Shiki output", checkTypographyPageUsesShikiOutput],
   ["post navigation and Hugo TOC depth render", checkPostNavigationAndTocDepth],
+  ["photo archive paginates and exposes loader hooks", checkPhotoArchivePaginationAndLoaderHooks],
+  ["photo archive uses salon wall and credits", checkPhotoArchiveUsesSalonWallAndCredits],
+  ["photo import workflow is documented", checkPhotoImportWorkflowDocumented],
   ["malformed URLs return a bad request", checkMalformedUrlsReturnBadRequest],
 ];
 

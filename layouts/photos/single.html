@@ -1,32 +1,52 @@
 {{- define "main" }}
 
-<article class="post-single photo-single">
-  <header class="post-header">
+{{- $hasExif := or .Params.camera .Params.lens .Params.focal_length .Params.aperture .Params.shutter .Params.iso .Params.location }}
+{{- $hasCredits := gt (len (.Params.credits | default slice)) 0 }}
+<article class="post-single photo-single{{ if or $hasExif $hasCredits }} has-photo-meta{{ end }}" data-photo-single>
+  <header class="post-header photo-header">
     <h1 class="post-title">{{ .Title }}</h1>
-    {{- if or .Params.camera .Params.lens .Params.location }}
-    <ul class="photo-meta">
-      {{- with .Params.camera }}<li><span>camera</span> {{ . }}</li>{{ end }}
-      {{- with .Params.lens }}<li><span>lens</span> {{ . }}</li>{{ end }}
-      {{- with .Params.location }}<li><span>location</span> {{ . }}</li>{{ end }}
-      <li><span>shot</span> {{ .Date.Format (.Site.Params.DateFormat | default "January 2, 2006") }}</li>
-    </ul>
-    {{- end }}
   </header>
 
-  <div class="photo-stack">
-    {{- range (.Resources.ByType "image") }}
-      {{- if (or (eq .Name "cover") (not (hasPrefix .Name "cover."))) }}
-        {{- $full := .Resize (printf "%dx webp q88" (math.Min 1600 .Width)) }}
-        {{- $half := .Resize "800x webp q80" }}
-        <figure>
-          <img
-            src="{{ $full.RelPermalink }}"
-            srcset="{{ $half.RelPermalink }} 800w, {{ $full.RelPermalink }} {{ $full.Width }}w"
-            sizes="(min-width: 1024px) 1024px, 100vw"
-            width="{{ $full.Width }}" height="{{ $full.Height }}"
-            alt="{{ $.Title }}" loading="lazy" decoding="async">
-        </figure>
+  <div class="photo-detail-shell">
+    <div class="photo-stack">
+      {{- range (.Resources.ByType "image") }}
+        {{- if (or (eq .Name "cover") (not (hasPrefix .Name "cover."))) }}
+          {{- $fullWidth := int (math.Min 1800 .Width) }}
+          {{- $full := .Resize (printf "%dx webp q88" $fullWidth) }}
+          {{- $halfWidth := int (math.Min 800 .Width) }}
+          {{- $half := .Resize (printf "%dx webp q80" $halfWidth) }}
+          {{- $viewerWidth := int (math.Min 2600 .Width) }}
+          {{- $viewer := .Resize (printf "%dx webp q90" $viewerWidth) }}
+          <figure class="photo-detail-figure{{ if gt .Height .Width }} is-portrait{{ else }} is-landscape{{ end }}">
+            <button
+              type="button"
+              class="photo-viewer-trigger"
+              data-photo-viewer-open
+              data-photo-viewer-src="{{ $viewer.RelPermalink }}"
+              data-photo-viewer-width="{{ $viewer.Width }}"
+              data-photo-viewer-height="{{ $viewer.Height }}"
+              aria-label="Open {{ $.Title }}">
+              <img
+                src="{{ $full.RelPermalink }}"
+                srcset="{{ $half.RelPermalink }} {{ $half.Width }}w{{ if ne $half.Width $full.Width }}, {{ $full.RelPermalink }} {{ $full.Width }}w{{ end }}"
+                sizes="(min-width: 1440px) 1320px, (min-width: 1024px) 1024px, 100vw"
+                width="{{ $full.Width }}" height="{{ $full.Height }}"
+                alt="{{ $.Title }}" loading="lazy" decoding="async">
+            </button>
+          </figure>
+        {{- end }}
       {{- end }}
+    </div>
+
+    {{- if or $hasExif $hasCredits }}
+    <aside class="photo-meta-rail" aria-label="Photo metadata">
+      {{- if $hasExif }}
+        {{- partial "photo_exif.html" (dict "page" . "mode" "single") }}
+      {{- end }}
+      {{- if $hasCredits }}
+        {{- partial "photo_credits.html" (dict "page" . "mode" "single") }}
+      {{- end }}
+    </aside>
     {{- end }}
   </div>
 
@@ -34,5 +54,17 @@
   <div class="post-content">{{ .Content }}</div>
   {{- end }}
 </article>
+
+<div class="photo-viewer" data-photo-viewer hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div class="photo-viewer-stage" data-photo-viewer-stage>
+    <img alt="" data-photo-viewer-image>
+  </div>
+  <div class="photo-viewer-toolbar" aria-label="Photo viewer controls">
+    <button type="button" data-photo-viewer-zoom="out" aria-label="Zoom out">−</button>
+    <button type="button" data-photo-viewer-zoom="reset" aria-label="Fit image to viewer">fit</button>
+    <button type="button" data-photo-viewer-zoom="in" aria-label="Zoom in">+</button>
+    <button type="button" data-photo-viewer-close aria-label="Close viewer">×</button>
+  </div>
+</div>
 
 {{- end }}

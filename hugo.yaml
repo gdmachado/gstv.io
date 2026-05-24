@@ -22,7 +22,10 @@ params:
   description: "Staff Software Engineer at Personio, based in London, UK, building distributed data systems, lakehouse infrastructure, and near-real-time data platforms."
   keywords: [Blog, Portfolio, PaperMod]
   author: Gus Machado
+  mainSections: ["posts"]
   images: ["/img/avatar.png"]
+  photos:
+    pageSize: 6
   DateFormat: "January 2, 2006"
   defaultTheme: auto # dark, light
   disableThemeToggle: false

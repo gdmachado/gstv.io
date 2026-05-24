@@ -17,6 +17,10 @@ clean:
 new SLUG:
     hugo new --kind post posts/{{SLUG}}/index.md
 
+# Import Lightroom-exported JPEGs into opaque photo bundles
+photos-import DIR=".context/photo-imports":
+    bun scripts/import-photos.mjs "{{DIR}}"
+
 # Bump PaperMod theme to latest master and tidy go.sum
 update-theme:
     hugo mod get github.com/adityatelange/hugo-PaperMod@master

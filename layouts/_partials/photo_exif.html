@@ -1,0 +1,55 @@
+{{- $page := .page | default . -}}
+{{- $mode := .mode | default "inline" -}}
+{{- $items := slice -}}
+{{- $aperture := "" -}}
+{{- $apertureSymbol := "" -}}
+{{- $lens := "" -}}
+{{- with $page.Params.aperture -}}
+  {{- $aperture = . -}}
+  {{- $apertureSymbol = replace . "f/" "ƒ/" -}}
+{{- end -}}
+{{- with $page.Params.lens -}}
+  {{- $lens = replaceRE `(?i)\bf/([0-9])` `ƒ/$1` . -}}
+  {{- $lens = replaceRE `(?i)\bf([0-9])` `ƒ/$1` $lens -}}
+{{- end -}}
+{{- $exposureParts := slice -}}
+{{- with $apertureSymbol }}{{- $exposureParts = $exposureParts | append . -}}{{- end -}}
+{{- with $page.Params.shutter }}{{- $exposureParts = $exposureParts | append . -}}{{- end -}}
+{{- with $page.Params.iso }}{{- $exposureParts = $exposureParts | append (printf "ISO %s" .) -}}{{- end -}}
+{{- $polaroidExposureParts := slice -}}
+{{- with $apertureSymbol }}{{- $polaroidExposureParts = $polaroidExposureParts | append . -}}{{- end -}}
+{{- with $page.Params.shutter }}{{- $polaroidExposureParts = $polaroidExposureParts | append . -}}{{- end -}}
+{{- with $page.Params.iso }}{{- $polaroidExposureParts = $polaroidExposureParts | append (printf "ISO %s" .) -}}{{- end -}}
+
+{{- if eq $mode "polaroid" -}}
+  {{- with $page.Params.camera }}{{- $items = $items | append (dict "label" "camera" "value" . "quoted" false "kind" "gear") -}}{{- end -}}
+  {{- with $lens }}{{- $items = $items | append (dict "label" "lens" "value" . "quoted" false "kind" "gear") -}}{{- end -}}
+  {{- with $page.Params.focal_length }}{{- $items = $items | append (dict "label" "focal" "value" . "quoted" false "kind" "focal") -}}{{- end -}}
+  {{- if gt (len $polaroidExposureParts) 0 -}}
+    {{- $items = $items | append (dict "label" "settings" "value" (delimit $polaroidExposureParts " ") "quoted" false "kind" "settings") -}}
+  {{- end -}}
+  {{- with $page.Params.location }}{{- $items = $items | append (dict "label" "place" "value" . "quoted" false "kind" "place") -}}{{- end -}}
+{{- else -}}
+  {{- with $page.Params.camera }}{{- $items = $items | append (dict "label" "camera" "value" . "quoted" true) -}}{{- end -}}
+  {{- with $lens }}{{- $items = $items | append (dict "label" "lens" "value" . "quoted" true) -}}{{- end -}}
+  {{- with $page.Params.focal_length }}{{- $items = $items | append (dict "label" "focalLength" "value" . "quoted" true) -}}{{- end -}}
+  {{- with $apertureSymbol }}{{- $items = $items | append (dict "label" "aperture" "value" . "quoted" true) -}}{{- end -}}
+  {{- with $page.Params.shutter }}{{- $items = $items | append (dict "label" "shutter" "value" . "quoted" true) -}}{{- end -}}
+  {{- with $page.Params.iso }}{{- $items = $items | append (dict "label" "iso" "value" . "quoted" false) -}}{{- end -}}
+  {{- with $page.Params.location }}{{- $items = $items | append (dict "label" "location" "value" . "quoted" true) -}}{{- end -}}
+{{- end -}}
+
+{{- if gt (len $items) 0 -}}
+<div class="photo-meta-object photo-meta-object-{{ $mode }}">
+  {{- if eq $mode "single" }}<div class="photo-meta-brace">photo.meta {</div>{{- end }}
+  <dl class="photo-exif photo-exif-{{ $mode }}">
+  {{- range $index, $item := $items }}
+  <div{{ with $item.kind }} class="photo-exif-{{ . }}"{{ end }}>
+    <dt>{{ $item.label }}</dt>
+    <dd>{{ if $item.quoted }}"{{ end }}{{ $item.value }}{{ if $item.quoted }}"{{ end }}{{ if eq $mode "single" }}{{ if lt (add $index 1) (len $items) }},{{ end }}{{ end }}</dd>
+  </div>
+  {{- end }}
+  </dl>
+  {{- if eq $mode "single" }}<div class="photo-meta-brace">}</div>{{- end }}
+</div>
+{{- end -}}

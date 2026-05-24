@@ -36,6 +36,46 @@ bun run dev
 
 Hugo still builds the site. Bun is only used for JavaScript dependencies and for the Shiki post-processing step that rewrites Hugo's generated code blocks in `public/`.
 
+## Photo Workflow
+
+Export finished photos from Lightroom Classic as JPEGs, then place them in `.context/photo-imports/` or pass the export folder directly:
+
+```sh
+just photos-import .context/photo-imports
+```
+
+The import command:
+
+- creates `content/photos/ph-<hash>/` so the published URL does not expose the original filename
+- writes the optimized site image to `photo.jpg` with a 2400px long edge and JPEG quality 95
+- creates `index.md` when one does not already exist
+- extracts camera, lens, focal length, aperture, shutter speed, ISO, and city/country location when Lightroom or macOS exposes those fields
+- avoids publishing exact GPS coordinates
+
+Review each generated `index.md` before publishing:
+
+- replace `title: "Untitled Photo"` with a human title
+- keep `location` at city/country level, for example `"London, United Kingdom"`
+- set `wall_size: "large"` on an occasional photo that should take more space in the salon wall
+- uncomment and fill `credits` for portraits, beauty, makeup, styling, or model work
+- leave `credits` absent for environmental shots
+
+Credit entries look like this:
+
+```yaml
+credits:
+  - role: "model"
+    name: "Name"
+    handle: "@handle"
+    url: "https://instagram.com/handle"
+  - role: "makeup"
+    name: "Name"
+    handle: "@handle"
+    url: "https://instagram.com/handle"
+```
+
+For RAW files, do the Lightroom Classic preparation step first: import the ARW/NEF files, apply conservative baseline adjustments, export JPEG previews for review, then run `just photos-import` on the approved JPEG export folder.
+
 ## Front Matter
 
 Useful defaults for a normal post:
