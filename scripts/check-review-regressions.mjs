@@ -342,7 +342,9 @@ async function checkPhotoArchiveUsesSalonWallAndCredits() {
   assert.match(css, /\.photo-detail-shell/, "photo CSS should style the single photo detail layout");
   assert.match(css, /\.photo-viewer/, "photo CSS should style the image viewer overlay");
   assert.match(css, /\.photo-viewer\s*\{[^}]*z-index:\s*1000002/s, "photo viewer should sit above the sticky site header");
-  assert.match(css, /\.photo-meta-link\s*\{[^}]*text-decoration-line:\s*underline/s, "photo metadata links should keep a visible underline");
+  assert.match(css, /\.photo-meta-object-single \.photo-meta-link,\s*\.photo-credits-object-single \.photo-meta-link\s*\{[^}]*text-decoration-line:\s*underline/s, "photo metadata links should keep a visible underline");
+  assert.match(css, /\.photo-meta-object-single \.photo-meta-string,\s*\.photo-credits-object-single \.photo-meta-string/s, "single photo metadata should scope syntax string colors to detail blocks");
+  assert.doesNotMatch(css, /(^|\n)\.photo-meta-(?:path|key|string|number|punctuation|link)(?::hover)?\s*\{/m, "photo syntax token colors should not apply globally to archive metadata");
   assert.match(css, /grid-template-rows:\s*minmax\(0,\s*1fr\)\s*auto/, "photo viewer should reserve space for controls while fitting the image");
   assert.match(css, /\.photo-salon-frame\.is-wall-large/, "photo CSS should provide a large sizing fallback");
   assert.match(css, /\.photo-salon-wall\.is-positioned/, "photo CSS should support positioned salon packing");

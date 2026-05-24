@@ -144,6 +144,10 @@ html[data-theme="dark"] {
 .photo-meta-object {
     margin: 0;
     font-family: var(--font-mono);
+}
+
+.photo-meta-object-single,
+.photo-credits-object-single {
     --photo-meta-path-color: var(--ctp-latte-mauve);
     --photo-meta-key-color: var(--ctp-latte-blue);
     --photo-meta-string-color: var(--ctp-latte-green);
@@ -152,7 +156,8 @@ html[data-theme="dark"] {
 }
 
 @media (prefers-color-scheme: dark) {
-    html:not([data-theme="light"]) .photo-meta-object {
+    html:not([data-theme="light"]) .photo-meta-object-single,
+    html:not([data-theme="light"]) .photo-credits-object-single {
         --photo-meta-path-color: var(--ctp-mocha-mauve);
         --photo-meta-key-color: var(--ctp-mocha-blue);
         --photo-meta-string-color: var(--ctp-mocha-green);
@@ -161,7 +166,8 @@ html[data-theme="dark"] {
     }
 }
 
-html[data-theme="dark"] .photo-meta-object {
+html[data-theme="dark"] .photo-meta-object-single,
+html[data-theme="dark"] .photo-credits-object-single {
     --photo-meta-path-color: var(--ctp-mocha-mauve);
     --photo-meta-key-color: var(--ctp-mocha-blue);
     --photo-meta-string-color: var(--ctp-mocha-green);
@@ -169,7 +175,8 @@ html[data-theme="dark"] .photo-meta-object {
     --photo-meta-punctuation-color: var(--ctp-mocha-subtext0);
 }
 
-html[data-theme="light"] .photo-meta-object {
+html[data-theme="light"] .photo-meta-object-single,
+html[data-theme="light"] .photo-credits-object-single {
     --photo-meta-path-color: var(--ctp-latte-mauve);
     --photo-meta-key-color: var(--ctp-latte-blue);
     --photo-meta-string-color: var(--ctp-latte-green);
@@ -177,7 +184,8 @@ html[data-theme="light"] .photo-meta-object {
     --photo-meta-punctuation-color: var(--ctp-latte-subtext1);
 }
 
-html[data-syntax="cb"] .photo-meta-object {
+html[data-syntax="cb"] .photo-meta-object-single,
+html[data-syntax="cb"] .photo-credits-object-single {
     --photo-meta-path-color: #cc79a7;
     --photo-meta-key-color: #0072b2;
     --photo-meta-string-color: #009e73;
@@ -186,7 +194,8 @@ html[data-syntax="cb"] .photo-meta-object {
 }
 
 @media (prefers-color-scheme: dark) {
-    html:not([data-theme="light"])[data-syntax="cb"] .photo-meta-object {
+    html:not([data-theme="light"])[data-syntax="cb"] .photo-meta-object-single,
+    html:not([data-theme="light"])[data-syntax="cb"] .photo-credits-object-single {
         --photo-meta-path-color: #cc79a7;
         --photo-meta-key-color: #56b4e9;
         --photo-meta-string-color: #009e73;
@@ -195,7 +204,8 @@ html[data-syntax="cb"] .photo-meta-object {
     }
 }
 
-html[data-theme="dark"][data-syntax="cb"] .photo-meta-object {
+html[data-theme="dark"][data-syntax="cb"] .photo-meta-object-single,
+html[data-theme="dark"][data-syntax="cb"] .photo-credits-object-single {
     --photo-meta-path-color: #cc79a7;
     --photo-meta-key-color: #56b4e9;
     --photo-meta-string-color: #009e73;
@@ -226,35 +236,41 @@ html[data-theme="dark"][data-syntax="cb"] .photo-meta-object {
 
 .photo-exif dt::after {
     content: ":";
-    color: var(--photo-meta-punctuation-color);
+    color: var(--photo-meta-punctuation-color, var(--secondary));
 }
 
 .photo-exif dd {
     color: var(--primary);
 }
 
-.photo-meta-path {
+.photo-meta-object-single .photo-meta-path,
+.photo-credits-object-single .photo-meta-path {
     color: var(--photo-meta-path-color);
 }
 
-.photo-meta-key,
-.photo-credit-key {
+.photo-meta-object-single .photo-meta-key,
+.photo-credits-object-single .photo-meta-key,
+.photo-credits-object-single .photo-credit-key {
     color: var(--photo-meta-key-color);
 }
 
-.photo-meta-string {
+.photo-meta-object-single .photo-meta-string,
+.photo-credits-object-single .photo-meta-string {
     color: var(--photo-meta-string-color);
 }
 
-.photo-meta-number {
+.photo-meta-object-single .photo-meta-number,
+.photo-credits-object-single .photo-meta-number {
     color: var(--photo-meta-number-color);
 }
 
-.photo-meta-punctuation {
+.photo-meta-object-single .photo-meta-punctuation,
+.photo-credits-object-single .photo-meta-punctuation {
     color: var(--photo-meta-punctuation-color);
 }
 
-.photo-meta-link {
+.photo-meta-object-single .photo-meta-link,
+.photo-credits-object-single .photo-meta-link {
     color: var(--photo-meta-string-color);
     text-decoration-line: underline;
     text-decoration-color: color-mix(in srgb, var(--photo-meta-string-color) 42%, transparent);
@@ -262,7 +278,8 @@ html[data-theme="dark"][data-syntax="cb"] .photo-meta-object {
     text-underline-offset: 0.22em;
 }
 
-.photo-meta-link:hover {
+.photo-meta-object-single .photo-meta-link:hover,
+.photo-credits-object-single .photo-meta-link:hover {
     color: var(--link-hover);
     text-decoration-color: currentColor;
 }
