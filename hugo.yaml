@@ -22,7 +22,10 @@ params:
   description: "Staff Software Engineer at Personio, based in London, UK, building distributed data systems, lakehouse infrastructure, and near-real-time data platforms."
   keywords: [Blog, Portfolio, PaperMod]
   author: Gus Machado
+  mainSections: ["posts"]
   images: ["/img/avatar.png"]
+  photos:
+    pageSize: 6
   DateFormat: "January 2, 2006"
   defaultTheme: auto # dark, light
   disableThemeToggle: false
@@ -176,8 +179,32 @@ markup:
     renderer:
       unsafe: true # allow raw HTML in markdown (we author all content)
 
+# Custom output formats for machine-friendly content.
+# /llms.txt and /llms-full.txt follow https://llmstxt.org.
+# Per-page raw markdown is exposed as <page>/index.md.
+outputFormats:
+  llms:
+    mediaType: text/plain
+    baseName: llms
+    isPlainText: true
+    notAlternative: true
+  llmsfull:
+    mediaType: text/plain
+    baseName: llms-full
+    isPlainText: true
+    notAlternative: true
+  markdown:
+    mediaType: text/markdown
+    isPlainText: true
+    notAlternative: true
+
 outputs:
   home:
     - HTML
     - RSS
     - JSON # is necessary
+    - llms
+    - llmsfull
+  page:
+    - HTML
+    - markdown

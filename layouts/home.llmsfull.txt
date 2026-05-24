@@ -1,0 +1,41 @@
+{{- /* /llms-full.txt: every post and page inlined as markdown. */ -}}
+# {{ .Site.Title }}: full content
+
+> {{ .Site.Params.description }}
+
+This file inlines the raw markdown of every post and content page on {{ .Site.BaseURL }}. For a curated index see {{ "llms.txt" | absURL }}. Photos are listed in the index but omitted here (their bodies are metadata-only).
+
+Usage policy: search and user-triggered AI browsing are welcome; training use is not granted. See {{ "robots.txt" | absURL }} for the formal signal.
+
+{{ range where .Site.RegularPages "Section" "posts" }}
+---
+url: {{ .Permalink }}
+title: {{ .Title }}
+date: {{ .Date.Format "2006-01-02" }}
+{{- with .Params.tags }}
+tags: {{ delimit . ", " }}
+{{- end }}
+{{- with .Description }}
+description: {{ . }}
+{{- end }}
+---
+
+# {{ .Title }}
+
+{{ .RawContent }}
+{{ end }}
+{{- range where .Site.RegularPages "Section" "" }}
+{{- if not (in (slice "search" "archives") .File.ContentBaseName) }}
+---
+url: {{ .Permalink }}
+title: {{ .Title }}
+{{- with .Params.summary }}
+summary: {{ . }}
+{{- end }}
+---
+
+# {{ .Title }}
+
+{{ .RawContent }}
+{{ end -}}
+{{ end }}

@@ -1,0 +1,63 @@
+# gstv.io robots policy
+#
+# Stance: easy to cite, easy to browse, not a free-for-all training grant.
+# Machine-friendly index: {{ "llms.txt" | absURL }}
+# Full-content dump:     {{ "llms-full.txt" | absURL }}
+# Per-page raw markdown is available at <page>/index.md
+#
+# Content-Signal is an emerging Cloudflare-backed signal
+# (https://contentsignals.org). Not universally honored yet, but
+# stated here as the policy of record.
+
+User-agent: *
+Allow: /
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+
+# Policy: normal search, AI input/retrieval, and user-triggered fetches are
+# allowed. Training, model development, and bulk data collection are not.
+# Some vendor controls bundle multiple uses; where no narrower training-only
+# control exists, this file chooses the training/data-collection opt-out.
+# Allowed by default includes Googlebot, Bingbot, Applebot, OAI-SearchBot,
+# ChatGPT-User, Claude-User, Claude-SearchBot, PerplexityBot, Perplexity-User,
+# Meta-WebIndexer, Meta-ExternalFetcher, Amzn-SearchBot, and Amzn-User.
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: cohere-training-data-crawler
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Diffbot-User
+Allow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: omgili
+Disallow: /
+
+Sitemap: {{ "sitemap.xml" | absURL }}
