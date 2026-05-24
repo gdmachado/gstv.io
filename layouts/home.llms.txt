@@ -1,0 +1,28 @@
+{{- /* /llms.txt: curated machine-readable index. https://llmstxt.org */ -}}
+# {{ .Site.Title }}
+
+> {{ .Site.Params.description }}
+
+Machine-friendly index of {{ .Site.BaseURL }}. Each page also exposes its source markdown at `<page-url>/index.md`. A full inlined dump is available at {{ "llms-full.txt" | absURL }}.
+
+Usage policy: search and user-triggered AI browsing are welcome; training use is not granted. See {{ "robots.txt" | absURL }} for the formal signal.
+
+## Posts
+{{ range where .Site.RegularPages "Section" "posts" -}}
+- [{{ .Title }}]({{ .Permalink }}){{ with .Description }}: {{ . }}{{ end }}
+{{ end }}
+## Pages
+{{ range where .Site.RegularPages "Section" "" -}}
+{{- if not (in (slice "search" "archives") .File.ContentBaseName) -}}
+- [{{ .Title }}]({{ .Permalink }}){{ with .Params.summary }}: {{ . }}{{ end }}
+{{ end -}}
+{{ end }}
+## Photos
+{{ range where .Site.RegularPages "Section" "photos" -}}
+- [{{ .Title }}]({{ .Permalink }})
+{{ end }}
+## Optional
+- [RSS feed]({{ "index.xml" | absURL }})
+- [JSON index]({{ "index.json" | absURL }})
+- [Tags]({{ "tags/" | absURL }})
+- [Sitemap]({{ "sitemap.xml" | absURL }})
